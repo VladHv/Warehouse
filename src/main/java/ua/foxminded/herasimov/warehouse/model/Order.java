@@ -2,11 +2,11 @@ package ua.foxminded.herasimov.warehouse.model;
 
 import java.util.List;
 
-public class Warehouse {
+public class Order {
 
     private Integer id;
-    private List<Order> orders;
-    private List<Goods> goods;
+    private List<OrderItem> items;
+    private OrderStatus status;
     private Supplier supplier;
-    private Manager manager;
+
 }

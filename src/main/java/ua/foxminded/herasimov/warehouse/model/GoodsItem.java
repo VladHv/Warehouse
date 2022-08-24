@@ -1,9 +1,6 @@
 package ua.foxminded.herasimov.warehouse.model;
 
-public class OrderItem {
-
-    private Integer id;
+public class GoodsItem {
     private Goods goods;
     private Integer amount;
-
 }
