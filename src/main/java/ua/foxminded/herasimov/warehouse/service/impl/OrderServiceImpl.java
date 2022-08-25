@@ -1,10 +1,12 @@
 package ua.foxminded.herasimov.warehouse.service.impl;
 
+import org.springframework.stereotype.Service;
 import ua.foxminded.herasimov.warehouse.model.Order;
 import ua.foxminded.herasimov.warehouse.service.OrderService;
 
 import java.util.List;
 
+@Service
 public class OrderServiceImpl implements OrderService {
 
     @Override
