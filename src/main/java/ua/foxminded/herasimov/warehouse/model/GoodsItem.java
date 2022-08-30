@@ -1,6 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 public class GoodsItem {
@@ -62,5 +63,18 @@ public class GoodsItem {
 
     public void setAmount(Integer amount) {
         this.amount = amount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GoodsItem goodsItem = (GoodsItem) o;
+        return Objects.equals(goods, goodsItem.goods) && Objects.equals(amount, goodsItem.amount);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(goods, amount);
     }
 }

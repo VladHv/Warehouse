@@ -1,6 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -83,5 +84,29 @@ public class Order {
 
     public void setSupplier(Supplier supplier) {
         this.supplier = supplier;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return Objects.equals(orderItems, order.orderItems) && status == order.status &&
+               Objects.equals(supplier, order.supplier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orderItems, status, supplier);
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+               "id=" + id +
+               ", orderItems=" + orderItems +
+               ", status=" + status +
+               ", supplier=" + supplier +
+               '}';
     }
 }
