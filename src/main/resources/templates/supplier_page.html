@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-    <title>Orders</title>
+    <title>Supplier Page</title>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg bg-light">
@@ -42,7 +42,49 @@
     </div>
 </nav>
 
+<form class="row w-25 p-5 mx-auto" th:action="@{/suppliers/{id} (id=${supplier.id})}" th:object="${supplier}" th:method="POST">
 
+    <div class="form-group">
+        <div class="col-12 text-center">
+            <a class="btn btn-outline-secondary" href="/suppliers" role="button">Return</a>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-center">
+        <div class="col-auto">
+            <label for="id" class="col-form-label">Supplier#</label>
+        </div>
+        <div class="col-auto">
+            <input readonly type="text" class="form-control-plaintext" id="id" placeholder="Id"
+                   th:field="*{id}">
+        </div>
+    </div>
+    <div class="mb-3">
+        <input type="text" class="form-control" id="firstName" placeholder="Name"
+               th:field="*{firstName}" disabled>
+    </div>
+    <div class="mb-3">
+        <input type="text" class="form-control" id="lastName" placeholder="Price"
+               th:field="*{lastName}" disabled>
+    </div>
+    <div class="form-group">
+        <div class="col-12 text-center">
+            <button type="edit" class="btn btn-warning" id="edit" onclick="return handleEdit()">Edit</button>
+
+            <button type="submit" class="btn btn-success" id="save" hidden>Save</button>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    function handleEdit() {
+        document.getElementById('firstName').disabled = false;
+        document.getElementById('lastName').disabled = false;
+        document.getElementById('edit').hidden = true;
+        document.getElementById('save').hidden = false;
+        return false;
+    }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
