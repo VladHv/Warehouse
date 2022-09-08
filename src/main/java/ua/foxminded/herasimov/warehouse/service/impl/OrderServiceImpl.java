@@ -20,10 +20,6 @@ public class OrderServiceImpl implements OrderService {
         this.dao = dao;
     }
 
-    @Override
-    public Order createEmptyOrder() {
-        return dao.save(new Order());
-    }
 
     @Override
     public void create(Order entity) {
@@ -58,5 +54,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findAll() {
         return dao.findAll();
+    }
+
+    @Override
+    public Order getUnregisteredOrder() {
+        return dao.findByStatusIsNull().orElse(dao.save(new Order()));
     }
 }

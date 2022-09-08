@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface OrderService extends Service<Integer, Order>{
 
-    Order createEmptyOrder();
+    Order getUnregisteredOrder();
 
 }
