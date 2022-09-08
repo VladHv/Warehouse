@@ -20,7 +20,10 @@ public class GoodsItemDtoMapper implements DtoMapper<GoodsItemDto, GoodsItem> {
     public GoodsItemDto toDto(GoodsItem entity) {
         return new GoodsItemDto.Builder().withId(entity.getId())
                                          .withGoodsId(entity.getGoods().getId())
+                                         .withGoodsName(entity.getGoods().getName())
+                                         .withGoodsPrice(entity.getGoods().getPrice())
                                          .withAmount(entity.getAmount())
+                                         .withTotalPrice(entity.getAmount() * entity.getGoods().getPrice())
                                          .build();
     }
 
