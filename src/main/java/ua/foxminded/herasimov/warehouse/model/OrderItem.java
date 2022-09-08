@@ -18,19 +18,21 @@ public class OrderItem {
     @JoinColumn(name = "goods_id")
     private Goods goods;
 
+    private Integer amount;
+
     public static class Builder {
         private OrderItem newOrderItem;
 
-        public Builder(){
+        public Builder() {
             newOrderItem = new OrderItem();
         }
 
-        public Builder withId(Integer id){
+        public Builder withId(Integer id) {
             newOrderItem.id = id;
             return this;
         }
 
-        public Builder withOrder(Order order){
+        public Builder withOrder(Order order) {
             newOrderItem.order = order;
             return this;
         }
@@ -40,7 +42,12 @@ public class OrderItem {
             return this;
         }
 
-        public OrderItem build(){
+        public Builder withAmount(Integer amount) {
+            newOrderItem.amount = amount;
+            return this;
+        }
+
+        public OrderItem build() {
             return newOrderItem;
         }
     }
@@ -79,18 +86,26 @@ public class OrderItem {
         this.quantity = quantity;
     }
 
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OrderItem orderItem = (OrderItem) o;
         return Objects.equals(order, orderItem.order) && Objects.equals(goods, orderItem.goods) &&
-               Objects.equals(quantity, orderItem.quantity);
+               Objects.equals(amount, orderItem.amount) && Objects.equals(quantity, orderItem.quantity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(order, goods, quantity);
+        return Objects.hash(order, goods, amount, quantity);
     }
 
     @Override
@@ -99,6 +114,7 @@ public class OrderItem {
                "id=" + id +
                ", order=" + order +
                ", goods=" + goods +
+               ", amount=" + amount +
                ", quantity=" + quantity +
                '}';
     }
