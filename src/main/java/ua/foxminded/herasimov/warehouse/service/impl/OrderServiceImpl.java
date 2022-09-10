@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ua.foxminded.herasimov.warehouse.dao.OrderDao;
 import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.Order;
-import ua.foxminded.herasimov.warehouse.model.Supplier;
+import ua.foxminded.herasimov.warehouse.model.OrderStatus;
 import ua.foxminded.herasimov.warehouse.service.OrderService;
 
 import java.util.List;
@@ -13,51 +13,59 @@ import java.util.List;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private OrderDao dao;
+    private OrderDao orderDao;
 
     @Autowired
-    public OrderServiceImpl(OrderDao dao) {
-        this.dao = dao;
+    public OrderServiceImpl(OrderDao orderDao) {
+        this.orderDao = orderDao;
     }
 
 
     @Override
     public void create(Order entity) {
-        dao.save(entity);
+        orderDao.save(entity);
     }
 
     @Override
     public Order findById(Integer id) {
-        return dao.findById(id).orElseThrow(() -> new ServiceException("Order not found by ID: " + id));
+        return orderDao.findById(id).orElseThrow(() -> new ServiceException("Order not found by ID: " + id));
     }
 
     @Override
     public void update(Order entity) {
-        Order orderFromDb = dao.findById(entity.getId()).orElseThrow(
+        Order orderFromDb = orderDao.findById(entity.getId()).orElseThrow(
             () -> new ServiceException("Order for update not found by ID: " + entity.getId()));
         orderFromDb.setItems(entity.getItems());
         orderFromDb.setStatus(entity.getStatus());
         orderFromDb.setSupplier(entity.getSupplier());
-        dao.save(orderFromDb);
+        orderDao.save(orderFromDb);
     }
 
     @Override
     public void delete(Integer id) {
-        dao.deleteById(id);
+        orderDao.deleteById(id);
     }
 
     @Override
     public void delete(Order entity) {
-        dao.delete(entity);
+        orderDao.delete(entity);
     }
 
     @Override
     public List<Order> findAll() {
-        return dao.findAll();
+        return orderDao.findAll();
     }
 
     @Override
     public Order getUnregisteredOrder() {
-        return dao.findByStatusIsNull().orElse(dao.save(new Order()));
+        return orderDao.findByStatusIsNull().orElseGet(() -> orderDao.save(new Order()));
+    }
+
+    @Override
+    public void setStatusNewToOrder(Integer id) {
+        Order order = orderDao.findById(id).orElseThrow(
+            () -> new ServiceException("Order not found by ID to set status NEW. ID:" + id));
+        order.setStatus(OrderStatus.NEW);
+        orderDao.save(order);
     }
 }

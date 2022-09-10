@@ -42,22 +42,45 @@
     </div>
 </nav>
 
-<!-- required to work with orderDto-->
-<div class="card" style="width: 18rem;">
-    <div class="card-body">
-        <h5 class="card-title">New Order</h5>
-        <p class="card-text">Total price</p>
-    </div>
-    <ul class="list-group list-group-flush">
-        <li class="list-group-item">An item</li>
-        <li class="list-group-item">A second item</li>
-        <li class="list-group-item">A third item</li>
-    </ul>
-    <div class="card-body">
-        <a href="#" class="card-link">Create</a>
-        <a href="#" class="card-link">Cancel</a>
+<div th:switch="${orderItemsFromOrder}" style="margin: 25px">
+    <h2 th:case="null">No Active Orders</h2>
+    <div th:case="*" class="card w-25" style="margin: 75px; align: center">
+        <div class="card-body">
+            <h5 class="card-title" th:text="'New Order #' + ${order.id}">New Order</h5>
+            <p class="card-text" th:text="'$' + ${orderPrice}">Order Price</p>
+        </div>
+        <table class="table table-secondary table-striped"
+        >
+            <thead>
+            <tr class="table-dark">
+                <th scope="col">Name</th>
+                <th scope="col">Total Price</th>
+                <th scope="col">Amount</th>
+                <th scope="col"></th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="orderItem: ${orderItemsFromOrder}">
+                <td th:text="${orderItem.name}">Name</td>
+                <td th:with="result=${orderItem.amount * orderItem.goods.price}">
+                    <span th:text="'$' + ${result}">Price</span>
+                </td>
+                <td th:text="${orderItem.amount}">Amount</td>
+                <td>
+                    <a type="button" class="btn btn-danger"
+                       th:href="@{/order_item/delete/{id} (id=${orderItem.id})}">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="card-body">
+            <a th:href="@{/order/create/{id} (id=${orderId})}" class="btn btn-success" role="button" data-bs-toggle="button">Create</a>
+            <a th:href="@{/order/cancel/{id} (id=${orderId})}" class="btn btn-danger" role="button" data-bs-toggle="button">Cancel</a>
+        </div>
     </div>
 </div>
+
 
 <div class="row row-cols-1 row-cols-md-3 g-4" style="margin: 75px">
     <div class="col" th:each="goodsItem : ${goodsItems}">
@@ -66,8 +89,18 @@
                 <h5 class="card-title" th:text="${goodsItem.goodsName}">Goods</h5>
                 <p class="card-text" th:text="'Price per one: $' + ${goodsItem.goodsPrice}">Price</p>
                 <p class="card-text" th:text="'Amount: ' + ${goodsItem.amount}">Amount</p>
-                <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Amount</p>
-<!--                add button 'Add  to order'-->
+                <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Total price</p>
+                <form th:action="@{/}" th:object="${orderItem}" th:method="POST">
+                    <div class="input-group mb-3">
+                        <input type="hidden" class="form-control" id="goodsId" th:value="*{goodsItem.goodsId}"
+                               th:field="*{goodsId}">
+                        <input type="hidden" class="form-control" id="orderId" th:value="*{orderId}"
+                               th:field="*{orderId}">
+                        <input type="number" class="form-control" name="amount" placeholder="Enter amount"
+                               aria-label="Enter amount" aria-describedby="button-addon2" th:field="*{amount}">
+                        <button class="btn btn-outline-success" type="submit" id="button-addon2">Add to order</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
