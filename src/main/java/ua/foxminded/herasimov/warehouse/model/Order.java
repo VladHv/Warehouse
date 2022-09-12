@@ -62,11 +62,11 @@ public class Order {
         this.id = id;
     }
 
-    public Set<OrderItem> getItems() {
+    public Set<OrderItem> getOrderItems() {
         return orderItems;
     }
 
-    public void setItems(Set<OrderItem> orderItems) {
+    public void setOrderItems(Set<OrderItem> orderItems) {
         this.orderItems = orderItems;
     }
 
@@ -91,20 +91,18 @@ public class Order {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Order order = (Order) o;
-        return Objects.equals(orderItems, order.orderItems) && status == order.status &&
-               Objects.equals(supplier, order.supplier);
+        return status == order.status && Objects.equals(supplier, order.supplier);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(orderItems, status, supplier);
+        return Objects.hash(status, supplier);
     }
 
     @Override
     public String toString() {
         return "Order{" +
                "id=" + id +
-               ", orderItems=" + orderItems +
                ", status=" + status +
                ", supplier=" + supplier +
                '}';

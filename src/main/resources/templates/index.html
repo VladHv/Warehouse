@@ -46,7 +46,7 @@
     <h2 th:case="null">No Active Orders</h2>
     <div th:case="*" class="card w-25" style="margin: 75px; align: center">
         <div class="card-body">
-            <h5 class="card-title" th:text="'New Order #' + ${order.id}">New Order</h5>
+            <h5 class="card-title" th:text="'New Order #' + ${orderId}">New Order</h5>
             <p class="card-text" th:text="'$' + ${orderPrice}">Order Price</p>
         </div>
         <table class="table table-secondary table-striped"
@@ -62,7 +62,7 @@
             </thead>
             <tbody>
             <tr th:each="orderItem: ${orderItemsFromOrder}">
-                <td th:text="${orderItem.name}">Name</td>
+                <td th:text="${orderItem.goods.name}">Name</td>
                 <td th:with="result=${orderItem.amount * orderItem.goods.price}">
                     <span th:text="'$' + ${result}">Price</span>
                 </td>
@@ -75,8 +75,8 @@
             </tbody>
         </table>
         <div class="card-body">
-            <a th:href="@{/order/create/{id} (id=${orderId})}" class="btn btn-success" role="button" data-bs-toggle="button">Create</a>
-            <a th:href="@{/order/cancel/{id} (id=${orderId})}" class="btn btn-danger" role="button" data-bs-toggle="button">Cancel</a>
+            <a type="button" class="btn btn-success" th:href="@{/order/create/{id} (id=${orderId})}">Create</a>
+            <a type="button" class="btn btn-danger" th:href="@{/order/cancel/{id} (id=${orderId})}">Cancel</a>
         </div>
     </div>
 </div>
@@ -90,14 +90,11 @@
                 <p class="card-text" th:text="'Price per one: $' + ${goodsItem.goodsPrice}">Price</p>
                 <p class="card-text" th:text="'Amount: ' + ${goodsItem.amount}">Amount</p>
                 <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Total price</p>
-                <form th:action="@{/}" th:object="${orderItem}" th:method="POST">
+                <form th:action="@{/}" th:method="POST">
                     <div class="input-group mb-3">
-                        <input type="hidden" class="form-control" id="goodsId" th:value="*{goodsItem.goodsId}"
-                               th:field="*{goodsId}">
-                        <input type="hidden" class="form-control" id="orderId" th:value="*{orderId}"
-                               th:field="*{orderId}">
-                        <input type="number" class="form-control" name="amount" placeholder="Enter amount"
-                               aria-label="Enter amount" aria-describedby="button-addon2" th:field="*{amount}">
+                        <input type="hidden" class="form-control" name="goodsId" th:value="${goodsItem.goodsId}">
+                        <input type="hidden" class="form-control" name="orderId" th:value="${orderId}">
+                        <input type="number" class="form-control" name="amount" placeholder="Enter amount">
                         <button class="btn btn-outline-success" type="submit" id="button-addon2">Add to order</button>
                     </div>
                 </form>

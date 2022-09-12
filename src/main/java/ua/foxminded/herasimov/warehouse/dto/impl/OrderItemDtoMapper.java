@@ -1,5 +1,6 @@
 package ua.foxminded.herasimov.warehouse.dto.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ua.foxminded.herasimov.warehouse.dao.GoodsDao;
 import ua.foxminded.herasimov.warehouse.dao.OrderDao;
@@ -11,6 +12,12 @@ public class OrderItemDtoMapper implements DtoMapper<OrderItemDto, OrderItem> {
 
     private GoodsDao goodsDao;
     private OrderDao orderDao;
+
+    @Autowired
+    public OrderItemDtoMapper(GoodsDao goodsDao, OrderDao orderDao) {
+        this.goodsDao = goodsDao;
+        this.orderDao = orderDao;
+    }
 
     @Override
     public OrderItemDto toDto(OrderItem entity) {

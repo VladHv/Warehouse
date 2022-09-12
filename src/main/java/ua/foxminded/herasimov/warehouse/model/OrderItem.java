@@ -52,8 +52,6 @@ public class OrderItem {
         }
     }
 
-    private Integer quantity;
-
     public Integer getId() {
         return id;
     }
@@ -78,14 +76,6 @@ public class OrderItem {
         this.goods = goods;
     }
 
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
     public Integer getAmount() {
         return amount;
     }
@@ -100,12 +90,12 @@ public class OrderItem {
         if (o == null || getClass() != o.getClass()) return false;
         OrderItem orderItem = (OrderItem) o;
         return Objects.equals(order, orderItem.order) && Objects.equals(goods, orderItem.goods) &&
-               Objects.equals(amount, orderItem.amount) && Objects.equals(quantity, orderItem.quantity);
+               Objects.equals(amount, orderItem.amount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(order, goods, amount, quantity);
+        return Objects.hash(order, goods, amount);
     }
 
     @Override
@@ -115,7 +105,6 @@ public class OrderItem {
                ", order=" + order +
                ", goods=" + goods +
                ", amount=" + amount +
-               ", quantity=" + quantity +
                '}';
     }
 }

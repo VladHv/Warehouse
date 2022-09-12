@@ -35,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     public void update(Order entity) {
         Order orderFromDb = orderDao.findById(entity.getId()).orElseThrow(
             () -> new ServiceException("Order for update not found by ID: " + entity.getId()));
-        orderFromDb.setItems(entity.getItems());
+        orderFromDb.setOrderItems(entity.getOrderItems());
         orderFromDb.setStatus(entity.getStatus());
         orderFromDb.setSupplier(entity.getSupplier());
         orderDao.save(orderFromDb);

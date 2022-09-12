@@ -2,6 +2,7 @@ package ua.foxminded.herasimov.warehouse.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ua.foxminded.herasimov.warehouse.dao.OrderDao;
 import ua.foxminded.herasimov.warehouse.dao.OrderItemDao;
 import ua.foxminded.herasimov.warehouse.exception.ServiceException;
@@ -39,7 +40,7 @@ public class OrderItemServiceImpl implements OrderItemService {
             () -> new ServiceException("OrderItem for update not found by ID: " + entity.getId()));
         orderItemFromDb.setOrder(entity.getOrder());
         orderItemFromDb.setGoods(entity.getGoods());
-        orderItemFromDb.setQuantity(entity.getQuantity());
+        orderItemFromDb.setAmount(entity.getAmount());
         orderItemDao.save(orderItemFromDb);
     }
 
@@ -59,8 +60,8 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
+    @Transactional
     public void cancelOrderItemsOfOrder(Integer orderId) {
-        // TODO: 10.09.2022 check if it's working
         Order order = orderDao.findById(orderId).orElseThrow(
             () -> new ServiceException(
                 "Order for order items removing not found by ID:" + orderId));
