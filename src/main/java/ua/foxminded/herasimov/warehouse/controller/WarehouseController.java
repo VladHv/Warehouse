@@ -12,11 +12,13 @@ import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDto;
 import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.model.Order;
+import ua.foxminded.herasimov.warehouse.model.OrderItem;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderServiceImpl;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -46,14 +48,16 @@ public class WarehouseController {
         List<GoodsItemDto> goodsItemsDto =
             goodsItemService.findAll().stream().map(g -> goodsItemDtoMapper.toDto(g)).collect(Collectors.toList());
         model.addAttribute("goodsItems", goodsItemsDto);
-        Order order = orderService.getUnregisteredOrder();
 
+        Order order = orderService.getUnregisteredOrder();
         model.addAttribute("orderId", order.getId());
-        model.addAttribute("orderItemsFromOrder", order.getOrderItems());
-        model.addAttribute("orderPrice",
-                           order.getOrderItems().stream()
-                                .mapToInt(orderItem -> orderItem.getAmount() * orderItem.getGoods().getPrice())
-                                .sum());
+        Set<OrderItem> orderItemsFromOrder = order.getOrderItems();
+        if (orderItemsFromOrder != null && !orderItemsFromOrder.isEmpty()) {
+            model.addAttribute("orderItemsFromOrder", orderItemsFromOrder);
+            model.addAttribute("orderPrice",
+                               orderItemsFromOrder.stream().mapToInt(
+                                   orderItem -> orderItem.getAmount() * orderItem.getGoods().getPrice()).sum());
+        }
         return "index";
     }
 
@@ -70,7 +74,7 @@ public class WarehouseController {
     }
 
     @GetMapping("/order_item/delete/{id}")
-    public String removeGoodsFromOrder(@PathVariable("id") Integer id){
+    public String removeGoodsFromOrder(@PathVariable("id") Integer id) {
         orderItemService.delete(id);
         return "redirect:/";
 
