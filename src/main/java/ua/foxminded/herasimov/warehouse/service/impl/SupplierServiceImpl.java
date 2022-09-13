@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.foxminded.herasimov.warehouse.dao.SupplierDao;
 import ua.foxminded.herasimov.warehouse.exception.ServiceException;
-import ua.foxminded.herasimov.warehouse.model.OrderItem;
 import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.SupplierService;
 

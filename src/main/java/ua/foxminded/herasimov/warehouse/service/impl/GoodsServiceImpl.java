@@ -2,15 +2,12 @@ package ua.foxminded.herasimov.warehouse.service.impl;
 
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ua.foxminded.herasimov.warehouse.dao.GoodsDao;
 import ua.foxminded.herasimov.warehouse.model.Goods;
 import ua.foxminded.herasimov.warehouse.service.GoodsService;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class GoodsServiceImpl implements GoodsService {
