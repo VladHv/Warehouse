@@ -11,6 +11,7 @@ import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDto;
 import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDto;
 import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDtoMapper;
+import ua.foxminded.herasimov.warehouse.model.GoodsItem;
 import ua.foxminded.herasimov.warehouse.model.Order;
 import ua.foxminded.herasimov.warehouse.model.OrderItem;
 import ua.foxminded.herasimov.warehouse.model.Supplier;
@@ -50,16 +51,18 @@ public class WarehouseController {
 
     @GetMapping("/")
     public String showHomePage(Model model) {
-        List<GoodsItemDto> goodsItemsDto =
-            goodsItemService.findAll().stream().map(g -> goodsItemDtoMapper.toDto(g)).collect(Collectors.toList());
-        Order order = orderService.getUnregisteredOrder();
-        List<Supplier> suppliers = supplierService.findAll();
+        List<GoodsItem> goodsItems = goodsItemService.findAll();
+        if(!goodsItems.isEmpty()) {
+            List<GoodsItemDto> goodsItemDtos =
+                goodsItems.stream().map(g -> goodsItemDtoMapper.toDto(g)).collect(Collectors.toList());
+            model.addAttribute("goodsItems", goodsItemDtos);
+        }
 
-        model.addAttribute("goodsItems", goodsItemsDto);
-        model.addAttribute("orderId", order.getId());
+        List<Supplier> suppliers = supplierService.findAll();
         model.addAttribute("suppliers", suppliers);
 
-
+        Order order = orderService.getUnregisteredOrder();
+        model.addAttribute("orderId", order.getId());
         Set<OrderItem> orderItemsFromOrder = order.getOrderItems();
         if (orderItemsFromOrder != null && !orderItemsFromOrder.isEmpty()) {
             model.addAttribute("orderItemsFromOrder", orderItemsFromOrder);

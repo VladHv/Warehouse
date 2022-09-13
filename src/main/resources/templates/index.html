@@ -76,35 +76,40 @@
         <div class="card-body">
             <form th:action="@{/new_order}" th:method="POST">
                 <input type="hidden" name="orderId" th:value="${orderId}">
-                <select class="form-select" aria-label="Default select example" th:name="supplierId" style="margin-bottom: 10px">
+                <select class="form-select" aria-label="Default select example" th:name="supplierId"
+                        style="margin-bottom: 10px">
                     <option selected>Choose supplier</option>
-                    <option th:each="supplier : ${suppliers}" th:value="${supplier.id}" th:text="${supplier.firstName} + ' ' + ${supplier.lastName}">Supplier</option>
+                    <option th:each="supplier : ${suppliers}" th:value="${supplier.id}"
+                            th:text="${supplier.firstName} + ' ' + ${supplier.lastName}">Supplier
+                    </option>
                 </select>
                 <button type="submit" class="btn btn-success">Create</button>
                 <a type="button" class="btn btn-danger" th:href="@{/order/cancel/{id} (id=${orderId})}">Cancel</a>
             </form>
-<!--            <a type="button" class="btn btn-success" th:href="@{/order/create/{id} (id=${orderId})}">Create</a>-->
         </div>
     </div>
 </div>
 
-
-<div class="row row-cols-1 row-cols-md-3 g-4" style="margin: 75px">
-    <div class="col" th:each="goodsItem : ${goodsItems}">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title" th:text="${goodsItem.goodsName}">Goods</h5>
-                <p class="card-text" th:text="'Price per one: $' + ${goodsItem.goodsPrice}">Price</p>
-                <p class="card-text" th:text="'Amount: ' + ${goodsItem.amount}">Amount</p>
-                <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Total price</p>
-                <form th:action="@{/add_goods}" th:method="POST">
-                    <div class="input-group mb-3">
-                        <input type="hidden" class="form-control" name="goodsId" th:value="${goodsItem.goodsId}">
-                        <input type="hidden" class="form-control" name="orderId" th:value="${orderId}">
-                        <input type="number" class="form-control" name="amount" placeholder="Enter amount">
-                        <button class="btn btn-outline-success" type="submit" id="button-addon2">Add to order</button>
-                    </div>
-                </form>
+<div th:switch="${goodsItems}">
+    <h2 th:case="null">No Goods Positions</h2>
+    <div th:case="*" class="row row-cols-1 row-cols-md-3 g-4" style="margin: 75px">
+        <div class="col" th:each="goodsItem : ${goodsItems}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${goodsItem.goodsName}">Goods</h5>
+                    <p class="card-text" th:text="'Price per one: $' + ${goodsItem.goodsPrice}">Price</p>
+                    <p class="card-text" th:text="'Amount: ' + ${goodsItem.amount}">Amount</p>
+                    <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Total price</p>
+                    <form th:action="@{/add_goods}" th:method="POST">
+                        <div class="input-group mb-3">
+                            <input type="hidden" class="form-control" name="goodsId" th:value="${goodsItem.goodsId}">
+                            <input type="hidden" class="form-control" name="orderId" th:value="${orderId}">
+                            <input type="number" class="form-control" name="amount" placeholder="Enter amount">
+                            <button class="btn btn-outline-success" type="submit" id="button-addon2">Add to order
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
