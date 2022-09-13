@@ -49,8 +49,7 @@
             <h5 class="card-title" th:text="'New Order #' + ${orderId}">New Order</h5>
             <p class="card-text" th:text="'$' + ${orderPrice}">Order Price</p>
         </div>
-        <table class="table table-secondary table-striped"
-        >
+        <table class="table table-secondary table-striped">
             <thead>
             <tr class="table-dark">
                 <th scope="col">Name</th>
@@ -75,8 +74,16 @@
             </tbody>
         </table>
         <div class="card-body">
-            <a type="button" class="btn btn-success" th:href="@{/order/create/{id} (id=${orderId})}">Create</a>
-            <a type="button" class="btn btn-danger" th:href="@{/order/cancel/{id} (id=${orderId})}">Cancel</a>
+            <form th:action="@{/new_order}" th:method="POST">
+                <input type="hidden" name="orderId" th:value="${orderId}">
+                <select class="form-select" aria-label="Default select example" th:name="supplierId" style="margin-bottom: 10px">
+                    <option selected>Choose supplier</option>
+                    <option th:each="supplier : ${suppliers}" th:value="${supplier.id}" th:text="${supplier.firstName} + ' ' + ${supplier.lastName}">Supplier</option>
+                </select>
+                <button type="submit" class="btn btn-success">Create</button>
+                <a type="button" class="btn btn-danger" th:href="@{/order/cancel/{id} (id=${orderId})}">Cancel</a>
+            </form>
+<!--            <a type="button" class="btn btn-success" th:href="@{/order/create/{id} (id=${orderId})}">Create</a>-->
         </div>
     </div>
 </div>
@@ -90,7 +97,7 @@
                 <p class="card-text" th:text="'Price per one: $' + ${goodsItem.goodsPrice}">Price</p>
                 <p class="card-text" th:text="'Amount: ' + ${goodsItem.amount}">Amount</p>
                 <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Total price</p>
-                <form th:action="@{/}" th:method="POST">
+                <form th:action="@{/add_goods}" th:method="POST">
                     <div class="input-group mb-3">
                         <input type="hidden" class="form-control" name="goodsId" th:value="${goodsItem.goodsId}">
                         <input type="hidden" class="form-control" name="orderId" th:value="${orderId}">

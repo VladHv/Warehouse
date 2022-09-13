@@ -3,9 +3,11 @@ package ua.foxminded.herasimov.warehouse.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.foxminded.herasimov.warehouse.dao.OrderDao;
+import ua.foxminded.herasimov.warehouse.dao.SupplierDao;
 import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.Order;
 import ua.foxminded.herasimov.warehouse.model.OrderStatus;
+import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.OrderService;
 
 import java.util.List;
@@ -14,10 +16,12 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     private OrderDao orderDao;
+    private SupplierDao supplierDao;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao) {
+    public OrderServiceImpl(OrderDao orderDao, SupplierDao supplierDao) {
         this.orderDao = orderDao;
+        this.supplierDao = supplierDao;
     }
 
 
@@ -62,10 +66,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void setStatusNewToOrder(Integer id) {
-        Order order = orderDao.findById(id).orElseThrow(
-            () -> new ServiceException("Order not found by ID to set status NEW. ID:" + id));
+    public void setSupplierAndStatusNew(Integer orderId, Integer supplierId) {
+        Order order = orderDao.findById(orderId).orElseThrow(
+            () -> new ServiceException("Order not found by ID to set status NEW and add supplier. ID:" + orderId));
+        Supplier supplier = supplierDao.findById(supplierId).orElseThrow(
+            () -> new ServiceException("Supplier #" + supplierId + " not found to add it to order #" + orderId));
         order.setStatus(OrderStatus.NEW);
+        order.setSupplier(supplier);
         orderDao.save(order);
     }
 }

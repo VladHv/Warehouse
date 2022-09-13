@@ -6,6 +6,6 @@ public interface OrderService extends Service<Integer, Order> {
 
     Order getUnregisteredOrder();
 
-    void setStatusNewToOrder(Integer id);
+    void setSupplierAndStatusNew(Integer orderId, Integer supplierId);
 
 }

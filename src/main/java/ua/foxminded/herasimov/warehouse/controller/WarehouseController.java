@@ -13,9 +13,11 @@ import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDto;
 import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.model.Order;
 import ua.foxminded.herasimov.warehouse.model.OrderItem;
+import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderServiceImpl;
+import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
 import java.util.List;
 import java.util.Set;
@@ -29,28 +31,35 @@ public class WarehouseController {
     private OrderItemServiceImpl orderItemService;
     private GoodsItemDtoMapper goodsItemDtoMapper;
     private OrderItemDtoMapper orderItemDtoMapper;
+    private SupplierServiceImpl supplierService;
 
     @Autowired
     public WarehouseController(GoodsItemServiceImpl goodsItemService,
                                OrderServiceImpl orderService,
                                OrderItemServiceImpl orderItemService,
                                GoodsItemDtoMapper goodsItemDtoMapper,
-                               OrderItemDtoMapper orderItemDtoMapper) {
+                               OrderItemDtoMapper orderItemDtoMapper,
+                               SupplierServiceImpl supplierService) {
         this.goodsItemService = goodsItemService;
         this.orderService = orderService;
         this.orderItemService = orderItemService;
         this.goodsItemDtoMapper = goodsItemDtoMapper;
         this.orderItemDtoMapper = orderItemDtoMapper;
+        this.supplierService = supplierService;
     }
 
     @GetMapping("/")
     public String showHomePage(Model model) {
         List<GoodsItemDto> goodsItemsDto =
             goodsItemService.findAll().stream().map(g -> goodsItemDtoMapper.toDto(g)).collect(Collectors.toList());
-        model.addAttribute("goodsItems", goodsItemsDto);
-
         Order order = orderService.getUnregisteredOrder();
+        List<Supplier> suppliers = supplierService.findAll();
+
+        model.addAttribute("goodsItems", goodsItemsDto);
         model.addAttribute("orderId", order.getId());
+        model.addAttribute("suppliers", suppliers);
+
+
         Set<OrderItem> orderItemsFromOrder = order.getOrderItems();
         if (orderItemsFromOrder != null && !orderItemsFromOrder.isEmpty()) {
             model.addAttribute("orderItemsFromOrder", orderItemsFromOrder);
@@ -61,7 +70,7 @@ public class WarehouseController {
         return "index";
     }
 
-    @PostMapping("/")
+    @PostMapping("/add_goods")
     public String addGoodsToOrder(@RequestParam("orderId") Integer orderId,
                                   @RequestParam("goodsId") Integer goodsId,
                                   @RequestParam("amount") Integer amount) {
@@ -80,9 +89,10 @@ public class WarehouseController {
 
     }
 
-    @GetMapping("/order/create/{id}")
-    public String createOrder(@PathVariable("id") Integer id) {
-        orderService.setStatusNewToOrder(id);
+    @PostMapping("/new_order")
+    public String createNewOrder(@RequestParam("orderId") Integer orderId,
+                                 @RequestParam("supplierId") Integer supplierId) {
+        orderService.setSupplierAndStatusNew(orderId, supplierId);
         return "redirect:/";
     }
 

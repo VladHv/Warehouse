@@ -38,7 +38,6 @@ public class Supplier extends Person {
         this.orders = orders;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -59,7 +58,6 @@ public class Supplier extends Person {
                "id=" + id +
                ", firstName='" + firstName + '\'' +
                ", lastName='" + lastName + '\'' +
-               ", orders=" + orders +
                '}';
     }
 }
