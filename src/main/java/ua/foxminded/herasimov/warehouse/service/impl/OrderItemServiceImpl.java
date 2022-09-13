@@ -11,6 +11,7 @@ import ua.foxminded.herasimov.warehouse.model.OrderItem;
 import ua.foxminded.herasimov.warehouse.service.OrderItemService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderItemServiceImpl implements OrderItemService {
@@ -26,7 +27,14 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Override
     public void create(OrderItem entity) {
-        orderItemDao.save(entity);
+        Optional<OrderItem> existingOrderItem = orderItemDao.findByOrderAndGoods(entity.getOrder(), entity.getGoods());
+        if (existingOrderItem.isPresent()) {
+            OrderItem orderItem = existingOrderItem.get();
+            orderItem.setAmount(orderItem.getAmount() + entity.getAmount());
+            orderItemDao.save(orderItem);
+        } else {
+            orderItemDao.save(entity);
+        }
     }
 
     @Override
@@ -37,7 +45,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Override
     public void update(OrderItem entity) {
         OrderItem orderItemFromDb = orderItemDao.findById(entity.getId()).orElseThrow(
-            () -> new ServiceException("OrderItem for update not found by ID: " + entity.getId()));
+                () -> new ServiceException("OrderItem for update not found by ID: " + entity.getId()));
         orderItemFromDb.setOrder(entity.getOrder());
         orderItemFromDb.setGoods(entity.getGoods());
         orderItemFromDb.setAmount(entity.getAmount());
@@ -63,8 +71,8 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Transactional
     public void cancelOrderItemsOfOrder(Integer orderId) {
         Order order = orderDao.findById(orderId).orElseThrow(
-            () -> new ServiceException(
-                "Order for order items removing not found by ID:" + orderId));
+                () -> new ServiceException(
+                        "Order for order items removing not found by ID:" + orderId));
         orderItemDao.deleteByOrder(order);
     }
 }
