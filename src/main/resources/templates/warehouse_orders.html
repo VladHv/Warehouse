@@ -49,7 +49,6 @@
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title" th:text="'Order #' + ${order.id}">Order</h3>
-                    <p class="card-text" th:text="'Order Price: $' + ${orderPrice}">Order Price</p>
                     <p th:switch="${order.status}" class="card-text">Status:
                         <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).NEW}" class="badge text-bg-primary">NEW</span>
                         <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).IN_PROGRESS}" class="badge text-bg-warning">IN PROCESS</span>
@@ -77,21 +76,10 @@
                     </tr>
                     </tbody>
                 </table>
-<!--                <div class="card-body">-->
-<!--                    <form th:action="@{/new_order}" th:method="POST">-->
-<!--                        <input type="hidden" name="orderId" th:value="${orderId}">-->
-<!--                        <select class="form-select" aria-label="Default select example" th:name="supplierId"-->
-<!--                                style="margin-bottom: 10px">-->
-<!--                            <option selected>Choose supplier</option>-->
-<!--                            <option th:each="supplier : ${suppliers}" th:value="${supplier.id}"-->
-<!--                                    th:text="${supplier.firstName} + ' ' + ${supplier.lastName}">Supplier-->
-<!--                            </option>-->
-<!--                        </select>-->
-<!--                        <button type="submit" class="btn btn-success">Create</button>-->
-<!--                        <a type="button" class="btn btn-danger"-->
-<!--                           th:href="@{/order/cancel/{id} (id=${orderId})}">Cancel</a>-->
-<!--                    </form>-->
-<!--                </div>-->
+                <div th:switch="${order.status}" class="card-body">
+                    <a th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).NEW}" type="button" class="btn btn-info" th:href="@{/take_order/{id} (id=${order.id})}">Take To Work</a>
+                    <a th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).IN_PROGRESS}" type="button" class="btn btn-success" th:href="@{/complete_order/{id} (id=${order.id})}">Complete</a>
+                </div>
             </div>
         </div>
     </div>

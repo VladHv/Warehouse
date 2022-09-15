@@ -2,26 +2,29 @@ package ua.foxminded.herasimov.warehouse.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ua.foxminded.herasimov.warehouse.dao.GoodsItemDao;
 import ua.foxminded.herasimov.warehouse.dao.OrderDao;
 import ua.foxminded.herasimov.warehouse.dao.SupplierDao;
 import ua.foxminded.herasimov.warehouse.exception.ServiceException;
-import ua.foxminded.herasimov.warehouse.model.Order;
-import ua.foxminded.herasimov.warehouse.model.OrderStatus;
-import ua.foxminded.herasimov.warehouse.model.Supplier;
+import ua.foxminded.herasimov.warehouse.model.*;
 import ua.foxminded.herasimov.warehouse.service.OrderService;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     private OrderDao orderDao;
     private SupplierDao supplierDao;
+    private GoodsItemDao goodsItemDao;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao, SupplierDao supplierDao) {
+    public OrderServiceImpl(OrderDao orderDao, SupplierDao supplierDao,
+                            GoodsItemDao goodsItemDao) {
         this.orderDao = orderDao;
         this.supplierDao = supplierDao;
+        this.goodsItemDao = goodsItemDao;
     }
 
 
@@ -74,5 +77,50 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.NEW);
         order.setSupplier(supplier);
         orderDao.save(order);
+    }
+
+    @Override
+    public List<Order> findAllCreatedOrder() {
+        return orderDao.findByStatusIsNotNull();
+    }
+
+    @Override
+    public void setStatusInProcess(Integer id) {
+        Order order = orderDao.findById(id).orElseThrow(
+            () -> new ServiceException("Order not found by ID to set status IN_PROCESS. ID:" + id));
+        order.setStatus(OrderStatus.IN_PROGRESS);
+        orderDao.save(order);
+    }
+
+    @Override
+    public void setStatusCompleted(Integer id) {
+        Order order = orderDao.findById(id).orElseThrow(
+            () -> new ServiceException("Order not found by ID to set status COMPLETED. ID:" + id));
+        order.setStatus(OrderStatus.COMPLETED);
+        orderDao.save(order);
+    }
+
+    @Override
+    public void setStatusCancel(Integer id) {
+        Order order = orderDao.findById(id).orElseThrow(
+            () -> new ServiceException("Order not found by ID to set status CANCELED. ID:" + id));
+        order.setStatus(OrderStatus.CANCELED);
+        orderDao.save(order);
+    }
+
+    @Override
+    public void closeCompletedOrder(Integer id) {
+        Order order = orderDao.findById(id).orElseThrow(
+            () -> new ServiceException("Order not found by ID to close order. ID:" + id));
+        order.setStatus(OrderStatus.CLOSED);
+
+        Set<OrderItem> orderItems = order.getOrderItems();
+        for (OrderItem orderItem : orderItems) {
+            GoodsItem goodsItem = goodsItemDao.findFirstByGoods(orderItem.getGoods()).orElseThrow(
+                () -> new ServiceException("GoodsItem not found by goods_id: " + orderItem.getGoods().getId()));
+            goodsItem.setAmount(goodsItem.getAmount() + orderItem.getAmount());
+            goodsItemDao.save(goodsItem);
+        }
+
     }
 }
