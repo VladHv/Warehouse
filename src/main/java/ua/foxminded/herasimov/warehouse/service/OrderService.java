@@ -19,4 +19,6 @@ public interface OrderService extends Service<Integer, Order> {
     void setStatusCancel(Integer id);
 
     void closeCompletedOrder(Integer id);
+
+    List<Order> findOrdersForSupplier();
 }

@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/warehouse_orders">Active Orders</a>
+                    <a class="nav-link active" aria-current="page" href="/warehouse_orders">Orders</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/supplier_orders">Supplier Page</a>
@@ -54,7 +54,8 @@
                         <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).IN_PROGRESS}" class="badge text-bg-warning">IN PROCESS</span>
                         <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).COMPLETED}" class="badge text-bg-success">COMPLETED</span>
                         <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).CLOSED}" class="badge text-bg-secondary">CLOSED</span>
-                        <span th:case="*" class="badge text-bg-danger">NULL</span>
+                        <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).CANCELED}" class="badge text-bg-danger">CANCELED</span>
+                        <span th:case="*" class="badge text-bg-dark">NULL</span>
                     </p>
                     <p th:unless="${order.supplier == null}" class="card-text" th:text="'Supplier: ' + ${order.supplier.firstName} + ' ' + ${order.supplier.lastName}">Supplier</p>
                 </div>
@@ -77,8 +78,8 @@
                     </tbody>
                 </table>
                 <div th:switch="${order.status}" class="card-body">
-                    <a th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).NEW}" type="button" class="btn btn-info" th:href="@{/take_order/{id} (id=${order.id})}">Take To Work</a>
-                    <a th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).IN_PROGRESS}" type="button" class="btn btn-success" th:href="@{/complete_order/{id} (id=${order.id})}">Complete</a>
+                    <a th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).COMPLETED}" type="button" class="btn btn-success" th:href="@{/close_order/{id} (id=${order.id})}">Close Order</a>
+                    <a th:if="${order.status} == ${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).NEW}" type="button" class="btn btn-danger" th:href="@{/cancel_order/{id} (id=${order.id})}">Cancel Order</a>
                 </div>
             </div>
         </div>

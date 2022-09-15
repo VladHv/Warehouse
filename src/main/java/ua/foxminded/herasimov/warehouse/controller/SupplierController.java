@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import ua.foxminded.herasimov.warehouse.model.Goods;
 import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
@@ -52,8 +51,4 @@ public class SupplierController {
         return "redirect:/suppliers/{id}";
     }
 
-    @GetMapping("/supplier_orders")
-    public String showSupplierOrders() {
-        return "supplier_orders";
-    }
 }

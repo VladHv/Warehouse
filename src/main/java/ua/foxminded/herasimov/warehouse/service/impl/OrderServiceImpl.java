@@ -123,4 +123,9 @@ public class OrderServiceImpl implements OrderService {
         }
 
     }
+
+    @Override
+    public List<Order> findOrdersForSupplier() {
+        return orderDao.findByStatusNotAndStatusNot(OrderStatus.CANCELED, OrderStatus.CLOSED);
+    }
 }

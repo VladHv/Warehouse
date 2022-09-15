@@ -21,17 +21,22 @@ public class OrderController {
     }
 
     @GetMapping("/orders")
-    public String showAllOrders() {
-        // TODO: 13.09.2022 maybe it is not required...will see
+    public String showAllOrders(Model model) {
+        model.addAttribute("orders", orderService.findAll());
         return "orders";
+    }
+
+    @GetMapping("/order_delete/{id}")
+    public String deleteOrder(@PathVariable("id") Integer id){
+        orderService.delete(id);
+        return "redirect:/orders";
     }
 
     @GetMapping("/supplier_orders")
     public String showSupplierOrders(Model model) {
-        // TODO: 15.09.2022 required orders for supplier only
-        List<Order> orders = orderService.findAllCreatedOrder();
+        List<Order> orders = orderService.findOrdersForSupplier();
         model.addAttribute("orders", orders);
-        return "warehouse_orders";
+        return "supplier_orders";
     }
 
     @GetMapping("/warehouse_orders")
@@ -44,13 +49,13 @@ public class OrderController {
     @GetMapping("/take_order/{id}")
     public String takeOrderToWork(@PathVariable("id") Integer orderId){
         orderService.setStatusInProcess(orderId);
-        return "redirect:/warehouse_orders";
+        return "redirect:/supplier_orders";
     }
 
     @GetMapping("/complete_order/{id}")
     public String completeOrder(@PathVariable("id") Integer orderId){
         orderService.setStatusCompleted(orderId);
-        return "redirect:/warehouse_orders";
+        return "redirect:/supplier_orders";
     }
 
     @GetMapping("/cancel_order/{id}")
@@ -64,4 +69,5 @@ public class OrderController {
         orderService.closeCompletedOrder(orderId);
         return "redirect:/warehouse_orders";
     }
+
 }
