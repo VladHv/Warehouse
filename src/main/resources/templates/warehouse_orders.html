@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <title>Warehouse Orders</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Warehouse</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/warehouse_orders">Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/supplier_orders">Supplier Page</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/goods">Goods positions</a></li>
+                        <li><a class="dropdown-item" href="/warehouse_goods">Goods at warehouse</a></li>
+                        <li><a class="dropdown-item" href="/orders">Orders management</a></li>
+                        <li><a class="dropdown-item" href="/suppliers">Suppliers</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div th:switch="${orders}">
+    <h2 th:case="null" style="margin: 25px">No Orders </h2>
+    <div th:case="*" class="row row-cols-1 row-cols-md-3 g-4" style="margin: 75px">
+        <div class="col" th:each="order : ${orders}">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title" th:text="'Order #' + ${order.id}">Order</h3>
+                    <p th:switch="${order.status}" class="card-text">Status:
+                        <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).NEW}" class="badge text-bg-primary">NEW</span>
+                        <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).IN_PROGRESS}" class="badge text-bg-warning">IN PROCESS</span>
+                        <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).COMPLETED}" class="badge text-bg-success">COMPLETED</span>
+                        <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).CLOSED}" class="badge text-bg-secondary">CLOSED</span>
+                        <span th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).CANCELED}" class="badge text-bg-danger">CANCELED</span>
+                        <span th:case="*" class="badge text-bg-dark">NULL</span>
+                    </p>
+                    <p th:unless="${order.supplier == null}" class="card-text" th:text="'Supplier: ' + ${order.supplier.firstName} + ' ' + ${order.supplier.lastName}">Supplier</p>
+                </div>
+                <table class="table table-secondary table-striped">
+                    <thead>
+                    <tr class="table-dark">
+                        <th scope="col">Name</th>
+                        <th scope="col">Total Price</th>
+                        <th scope="col">Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="orderItem: ${order.orderItems}">
+                        <td th:text="${orderItem.goods.name}">Name</td>
+                        <td th:with="result=${orderItem.amount * orderItem.goods.price}">
+                            <span th:text="'$' + ${result}">Price</span>
+                        </td>
+                        <td th:text="${orderItem.amount}">Amount</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div th:switch="${order.status}" class="card-body">
+                    <a th:case="${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).COMPLETED}" type="button" class="btn btn-success" th:href="@{/close_order/{id} (id=${order.id})}">Close Order</a>
+                    <a th:if="${order.status} == ${T(ua.foxminded.herasimov.warehouse.model.OrderStatus).NEW}" type="button" class="btn btn-danger" th:href="@{/cancel_order/{id} (id=${order.id})}">Cancel Order</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+        crossorigin="anonymous"></script>
+</body>
+</html>

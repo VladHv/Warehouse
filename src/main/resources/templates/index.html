@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <title>Warehouse</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Warehouse</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/warehouse_orders">Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/supplier_orders">Supplier Page</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/goods">Goods positions</a></li>
+                        <li><a class="dropdown-item" href="/warehouse_goods">Goods at warehouse</a></li>
+                        <li><a class="dropdown-item" href="/orders">Orders management</a></li>
+                        <li><a class="dropdown-item" href="/suppliers">Suppliers</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div th:switch="${orderItemsFromOrder}" style="margin: 25px">
+    <h2 th:case="null">No Active Orders</h2>
+    <div th:case="*" class="card w-25" style="margin: 75px; align: center">
+        <div class="card-body">
+            <h5 class="card-title" th:text="'New Order #' + ${orderId}">New Order</h5>
+            <p class="card-text" th:text="'$' + ${orderPrice}">Order Price</p>
+        </div>
+        <table class="table table-secondary table-striped">
+            <thead>
+            <tr class="table-dark">
+                <th scope="col">Name</th>
+                <th scope="col">Total Price</th>
+                <th scope="col">Amount</th>
+                <th scope="col"></th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="orderItem: ${orderItemsFromOrder}">
+                <td th:text="${orderItem.goods.name}">Name</td>
+                <td th:with="result=${orderItem.amount * orderItem.goods.price}">
+                    <span th:text="'$' + ${result}">Price</span>
+                </td>
+                <td th:text="${orderItem.amount}">Amount</td>
+                <td>
+                    <a type="button" class="btn btn-danger"
+                       th:href="@{/order_item/delete/{id} (id=${orderItem.id})}">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="card-body">
+            <form th:action="@{/new_order}" th:method="POST">
+                <input type="hidden" name="orderId" th:value="${orderId}">
+                <select class="form-select" aria-label="Default select example" th:name="supplierId"
+                        style="margin-bottom: 10px">
+                    <option selected>Choose supplier</option>
+                    <option th:each="supplier : ${suppliers}" th:value="${supplier.id}"
+                            th:text="${supplier.firstName} + ' ' + ${supplier.lastName}">Supplier
+                    </option>
+                </select>
+                <button type="submit" class="btn btn-success">Create</button>
+                <a type="button" class="btn btn-danger" th:href="@{/order/cancel/{id} (id=${orderId})}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:switch="${goodsItems}">
+    <h2 th:case="null">No Goods Positions</h2>
+    <div th:case="*" class="row row-cols-1 row-cols-md-3 g-4" style="margin: 75px">
+        <div class="col" th:each="goodsItem : ${goodsItems}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${goodsItem.goodsName}">Goods</h5>
+                    <p class="card-text" th:text="'Price per one: $' + ${goodsItem.goodsPrice}">Price</p>
+                    <p class="card-text" th:text="'Amount: ' + ${goodsItem.amount}">Amount</p>
+                    <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Total price</p>
+                    <form th:action="@{/add_goods}" th:method="POST">
+                        <div class="input-group mb-3">
+                            <input type="hidden" class="form-control" name="goodsId" th:value="${goodsItem.goodsId}">
+                            <input type="hidden" class="form-control" name="orderId" th:value="${orderId}">
+                            <input type="number" class="form-control" name="amount" placeholder="Enter amount">
+                            <button class="btn btn-outline-success" type="submit" id="button-addon2">Add to order
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+        crossorigin="anonymous"></script>
+</body>
+</html>
