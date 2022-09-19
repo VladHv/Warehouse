@@ -53,10 +53,12 @@
                 <div class="mb-3">
                     <input type="text" class="form-control" id="name" placeholder="First Name"
                            th:field="*{firstName}">
+                    <div class="alert alert-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
                 </div>
                 <div class="mb-3">
                     <input type="text" class="form-control" id="price" placeholder="Last Name"
                            th:field="*{lastName}">
+                    <div class="alert alert-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
                 </div>
                 <div class="col-12 text-center">
                     <button type="submit" class="btn btn-success">Create</button>

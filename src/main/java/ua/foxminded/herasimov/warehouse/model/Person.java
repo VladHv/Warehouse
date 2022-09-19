@@ -4,6 +4,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @MappedSuperclass
@@ -12,7 +14,13 @@ public abstract class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Integer id;
+
+    @NotBlank(message = "First name required")
+    @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
     protected String firstName;
+
+    @NotBlank(message = "Last name required")
+    @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
     protected String lastName;
 
     protected Person() {

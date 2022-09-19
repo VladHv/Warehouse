@@ -1,6 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "supplier_id")
+    @NotNull(message = "Choose supplier!")
     private Supplier supplier;
 
     public static class Builder {

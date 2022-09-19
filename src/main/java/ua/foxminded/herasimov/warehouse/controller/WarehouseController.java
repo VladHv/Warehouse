@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDto;
 import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDto;
@@ -52,7 +53,7 @@ public class WarehouseController {
     @GetMapping("/")
     public String showHomePage(Model model) {
         List<GoodsItem> goodsItems = goodsItemService.findAll();
-        if(!goodsItems.isEmpty()) {
+        if (!goodsItems.isEmpty()) {
             List<GoodsItemDto> goodsItemDtos =
                 goodsItems.stream().map(g -> goodsItemDtoMapper.toDto(g)).collect(Collectors.toList());
             model.addAttribute("goodsItems", goodsItemDtos);
@@ -76,7 +77,12 @@ public class WarehouseController {
     @PostMapping("/add_goods")
     public String addGoodsToOrder(@RequestParam("orderId") Integer orderId,
                                   @RequestParam("goodsId") Integer goodsId,
-                                  @RequestParam("amount") Integer amount) {
+                                  @RequestParam(value = "amount", required = false) Integer amount,
+                                  RedirectAttributes redirectAttributes) {
+        if (amount == null || amount <= 0) {
+            redirectAttributes.addFlashAttribute("amountError", "Amount should be at least one");
+            return "redirect:/";
+        }
         orderItemService.create(orderItemDtoMapper.toEntity(new OrderItemDto.Builder()
                                                                 .withOrderId(orderId)
                                                                 .withGoodsId(goodsId)

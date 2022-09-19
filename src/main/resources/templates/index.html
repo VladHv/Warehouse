@@ -78,7 +78,7 @@
                 <input type="hidden" name="orderId" th:value="${orderId}">
                 <select class="form-select" aria-label="Default select example" th:name="supplierId"
                         style="margin-bottom: 10px">
-                    <option selected>Choose supplier</option>
+                    <option selected disabled value="">Choose supplier...</option>
                     <option th:each="supplier : ${suppliers}" th:value="${supplier.id}"
                             th:text="${supplier.firstName} + ' ' + ${supplier.lastName}">Supplier
                     </option>
@@ -92,6 +92,7 @@
 
 <div th:switch="${goodsItems}">
     <h2 th:case="null">No Goods Positions</h2>
+    <div class="alert alert-danger" style="width: 500px; margin-left: 100px" th:unless="${amountError == null}" th:text="${amountError}"></div>
     <div th:case="*" class="row row-cols-1 row-cols-md-3 g-4" style="margin: 75px">
         <div class="col" th:each="goodsItem : ${goodsItems}">
             <div class="card">
@@ -100,12 +101,12 @@
                     <p class="card-text" th:text="'Price per one: $' + ${goodsItem.goodsPrice}">Price</p>
                     <p class="card-text" th:text="'Amount: ' + ${goodsItem.amount}">Amount</p>
                     <p class="card-text" th:text="'Total price: $' + ${goodsItem.totalPrice}">Total price</p>
-                    <form th:action="@{/add_goods}" th:method="POST">
-                        <div class="input-group mb-3">
+                    <form class="row g-3 needs-validation" novalidate th:action="@{/add_goods}" th:object="${newOrderItem}" th:method="POST">
+                        <div class="col-mb-3">
                             <input type="hidden" class="form-control" name="goodsId" th:value="${goodsItem.goodsId}">
                             <input type="hidden" class="form-control" name="orderId" th:value="${orderId}">
                             <input type="number" class="form-control" name="amount" placeholder="Enter amount">
-                            <button class="btn btn-outline-success" type="submit" id="button-addon2">Add to order
+                            <button class="btn btn-outline-success" style="margin-top: 10px" type="submit">Add to order
                             </button>
                         </div>
                     </form>

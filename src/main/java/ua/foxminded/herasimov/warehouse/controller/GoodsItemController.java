@@ -3,6 +3,7 @@ package ua.foxminded.herasimov.warehouse.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,8 @@ import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDto;
 import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsServiceImpl;
+
+import javax.validation.Valid;
 
 @Controller
 public class GoodsItemController {
@@ -37,7 +40,13 @@ public class GoodsItemController {
     }
 
     @PostMapping("/warehouse_goods")
-    public String createGoodsItem(@ModelAttribute("goodsItem") GoodsItemDto goodsItemDto) {
+    public String createGoodsItem(@Valid @ModelAttribute("goodsItem") GoodsItemDto goodsItemDto,
+                                  BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("goodsItems", goodsItemService.findAll());
+            model.addAttribute("goodsList", goodsService.findAll());
+            return "warehouse_goods";
+        }
         goodsItemService.create(dtoMapper.toEntity(goodsItemDto));
         return "redirect:/warehouse_goods";
     }
@@ -56,7 +65,12 @@ public class GoodsItemController {
     }
 
     @PostMapping("/warehouse_goods/{id}")
-    public String updateGoodsItem(@ModelAttribute("goodsItem") GoodsItemDto goodsItemDto) {
+    public String updateGoodsItem(@Valid @ModelAttribute("goodsItem") GoodsItemDto goodsItemDto,
+                                  BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("goodsList", goodsService.findAll());
+            return "warehouse_goods_page";
+        }
         goodsItemService.update(dtoMapper.toEntity(goodsItemDto));
         return "redirect:/warehouse_goods/{id}";
     }
