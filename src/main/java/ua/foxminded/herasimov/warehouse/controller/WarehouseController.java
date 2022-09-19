@@ -3,24 +3,17 @@ package ua.foxminded.herasimov.warehouse.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDto;
-import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
-import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDto;
-import ua.foxminded.herasimov.warehouse.dto.impl.OrderItemDtoMapper;
-import ua.foxminded.herasimov.warehouse.model.GoodsItem;
-import ua.foxminded.herasimov.warehouse.model.Order;
-import ua.foxminded.herasimov.warehouse.model.OrderItem;
-import ua.foxminded.herasimov.warehouse.model.Supplier;
+import ua.foxminded.herasimov.warehouse.dto.impl.*;
+import ua.foxminded.herasimov.warehouse.model.*;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,6 +27,7 @@ public class WarehouseController {
     private GoodsItemDtoMapper goodsItemDtoMapper;
     private OrderItemDtoMapper orderItemDtoMapper;
     private SupplierServiceImpl supplierService;
+    private OrderDtoMapper orderDtoMapper;
 
     @Autowired
     public WarehouseController(GoodsItemServiceImpl goodsItemService,
@@ -41,13 +35,15 @@ public class WarehouseController {
                                OrderItemServiceImpl orderItemService,
                                GoodsItemDtoMapper goodsItemDtoMapper,
                                OrderItemDtoMapper orderItemDtoMapper,
-                               SupplierServiceImpl supplierService) {
+                               SupplierServiceImpl supplierService,
+                               OrderDtoMapper orderDtoMapper) {
         this.goodsItemService = goodsItemService;
         this.orderService = orderService;
         this.orderItemService = orderItemService;
         this.goodsItemDtoMapper = goodsItemDtoMapper;
         this.orderItemDtoMapper = orderItemDtoMapper;
         this.supplierService = supplierService;
+        this.orderDtoMapper = orderDtoMapper;
     }
 
     @GetMapping("/")
@@ -63,7 +59,7 @@ public class WarehouseController {
         model.addAttribute("suppliers", suppliers);
 
         Order order = orderService.getUnregisteredOrder();
-        model.addAttribute("orderId", order.getId());
+        model.addAttribute("order", orderDtoMapper.toDto(order));
         Set<OrderItem> orderItemsFromOrder = order.getOrderItems();
         if (orderItemsFromOrder != null && !orderItemsFromOrder.isEmpty()) {
             model.addAttribute("orderItemsFromOrder", orderItemsFromOrder);
@@ -83,11 +79,11 @@ public class WarehouseController {
             redirectAttributes.addFlashAttribute("amountError", "Amount should be at least one");
             return "redirect:/";
         }
-        orderItemService.create(orderItemDtoMapper.toEntity(new OrderItemDto.Builder()
-                                                                .withOrderId(orderId)
-                                                                .withGoodsId(goodsId)
-                                                                .withAmount(amount)
-                                                                .build()));
+        OrderItemDto orderItemDto = new OrderItemDto.Builder().withOrderId(orderId)
+                                                              .withGoodsId(goodsId)
+                                                              .withAmount(amount)
+                                                              .build();
+        orderItemService.create(orderItemDtoMapper.toEntity(orderItemDto));
         return "redirect:/";
     }
 
@@ -95,13 +91,34 @@ public class WarehouseController {
     public String removeGoodsFromOrder(@PathVariable("id") Integer id) {
         orderItemService.delete(id);
         return "redirect:/";
-
     }
 
     @PostMapping("/new_order")
-    public String createNewOrder(@RequestParam("orderId") Integer orderId,
-                                 @RequestParam("supplierId") Integer supplierId) {
-        orderService.setSupplierAndStatusNew(orderId, supplierId);
+    public String createNewOrder(@Valid @ModelAttribute("order") OrderDto orderDto, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            List<GoodsItem> goodsItems = goodsItemService.findAll();
+            if (!goodsItems.isEmpty()) {
+                List<GoodsItemDto> goodsItemDtos =
+                    goodsItems.stream().map(g -> goodsItemDtoMapper.toDto(g)).collect(Collectors.toList());
+                model.addAttribute("goodsItems", goodsItemDtos);
+            }
+
+            List<Supplier> suppliers = supplierService.findAll();
+            model.addAttribute("suppliers", suppliers);
+
+            Order order = orderService.getUnregisteredOrder();
+            Set<OrderItem> orderItemsFromOrder = order.getOrderItems();
+            if (orderItemsFromOrder != null && !orderItemsFromOrder.isEmpty()) {
+                model.addAttribute("orderItemsFromOrder", orderItemsFromOrder);
+                model.addAttribute("orderPrice",
+                                   orderItemsFromOrder.stream().mapToInt(
+                                       orderItem -> orderItem.getAmount() * orderItem.getGoods().getPrice()).sum());
+            }
+            return "index";
+        }
+        Order order = orderDtoMapper.toEntity(orderDto);
+        order.setStatus(OrderStatus.NEW);
+        orderService.update(order);
         return "redirect:/";
     }
 

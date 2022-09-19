@@ -46,7 +46,7 @@
     <h2 th:case="null">No Active Orders</h2>
     <div th:case="*" class="card w-25" style="margin: 75px; align: center">
         <div class="card-body">
-            <h5 class="card-title" th:text="'New Order #' + ${orderId}">New Order</h5>
+            <h5 class="card-title" th:text="'New Order #' + ${order.id}">New Order</h5>
             <p class="card-text" th:text="'$' + ${orderPrice}">Order Price</p>
         </div>
         <table class="table table-secondary table-striped">
@@ -74,17 +74,18 @@
             </tbody>
         </table>
         <div class="card-body">
-            <form th:action="@{/new_order}" th:method="POST">
-                <input type="hidden" name="orderId" th:value="${orderId}">
-                <select class="form-select" aria-label="Default select example" th:name="supplierId"
+            <form th:action="@{/new_order}" th:object="${order}" th:method="POST">
+                <input type="hidden" th:field="*{id}">
+                <select class="form-select" aria-label="Default select example" th:field="*{supplierId}"
                         style="margin-bottom: 10px">
-                    <option selected disabled value="">Choose supplier...</option>
+                    <option selected value="">Choose supplier...</option>
                     <option th:each="supplier : ${suppliers}" th:value="${supplier.id}"
                             th:text="${supplier.firstName} + ' ' + ${supplier.lastName}">Supplier
                     </option>
                 </select>
+                <div class="alert alert-danger" th:if="${#fields.hasErrors('supplierId')}" th:errors="*{supplierId}"></div>
                 <button type="submit" class="btn btn-success">Create</button>
-                <a type="button" class="btn btn-danger" th:href="@{/order/cancel/{id} (id=${orderId})}">Cancel</a>
+                <a type="button" class="btn btn-danger" th:href="@{/order/cancel/{id} (id=${order.id})}">Cancel</a>
             </form>
         </div>
     </div>
@@ -104,7 +105,7 @@
                     <form class="row g-3 needs-validation" novalidate th:action="@{/add_goods}" th:object="${newOrderItem}" th:method="POST">
                         <div class="col-mb-3">
                             <input type="hidden" class="form-control" name="goodsId" th:value="${goodsItem.goodsId}">
-                            <input type="hidden" class="form-control" name="orderId" th:value="${orderId}">
+                            <input type="hidden" class="form-control" name="orderId" th:value="${order.id}">
                             <input type="number" class="form-control" name="amount" placeholder="Enter amount">
                             <button class="btn btn-outline-success" style="margin-top: 10px" type="submit">Add to order
                             </button>
