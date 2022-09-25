@@ -25,13 +25,13 @@ class GoodsControllerTest {
     private GoodsServiceImpl service;
 
     @InjectMocks
-    GoodsController controller;
+    private GoodsController controller;
 
 
     @Test
-    void createGoods_whenBad() throws Exception {
+    void createGoods_shouldHasNameFieldErrors_whenNameSizeOneOrLess() throws Exception {
         mockMvc.perform(post("/goods")
-                            .param("name", "B")
+                            .param("name", "A")
                             .param("price", "12"))
                .andExpect(model().attributeHasFieldErrors("goods", "name"))
                .andExpect(view().name("goods"))
@@ -40,13 +40,121 @@ class GoodsControllerTest {
     }
 
     @Test
-    void createGoods_whenGood() throws Exception {
+    void createGoods_shouldHasNameFieldErrors_whenNameMoreThanTwoHundredAndFifty() throws Exception {
+        mockMvc.perform(post("/goods")
+                            .param("name", "A".repeat(251))
+                            .param("price", "12"))
+               .andExpect(model().attributeHasFieldErrors("goods", "name"))
+               .andExpect(view().name("goods"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void createGoods_shouldHasNameFieldErrors_whenNameIsNull() throws Exception {
+        mockMvc.perform(post("/goods")
+                            .param("price", "12"))
+               .andExpect(model().attributeHasFieldErrors("goods", "name"))
+               .andExpect(view().name("goods"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void createGoods_shouldHasPriceFieldErrors_whenPriceValueIsLessThanOne() throws Exception {
+        mockMvc.perform(post("/goods")
+                            .param("name", "Bob")
+                            .param("price", "-1"))
+               .andExpect(model().attributeHasFieldErrors("goods", "price"))
+               .andExpect(view().name("goods"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void createGoods_shouldHasPriceFieldErrors_whenPriceValueIsNull() throws Exception {
+        mockMvc.perform(post("/goods")
+                            .param("name", "Bob")
+                            .param("price", ""))
+               .andExpect(model().attributeHasFieldErrors("goods", "price"))
+               .andExpect(view().name("goods"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void createGoods_shouldHasNoErrorsAndRedirectToPage_whenNameAndPriceAreValid() throws Exception {
         mockMvc.perform(post("/goods")
                             .param("name", "Bean")
                             .param("price", "12"))
+               .andExpect(model().attributeHasNoErrors())
                .andExpect(redirectedUrl("/goods"))
                .andExpect(status().is3xxRedirection())
                .andDo(print());
     }
 
+    @Test
+    void updateGoods_shouldHasNameFieldErrors_whenNameSizeOneOrLess() throws Exception {
+        mockMvc.perform(post("/goods/{id}", 1)
+                            .param("name", "A")
+                            .param("price", "12"))
+               .andExpect(model().attributeHasFieldErrors("goods", "name"))
+               .andExpect(view().name("goods_page"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void updateGoods_shouldHasNameFieldErrors_whenNameMoreThanTwoHundredAndFifty() throws Exception {
+        mockMvc.perform(post("/goods/{id}", 1)
+                            .param("name", "A".repeat(251))
+                            .param("price", "12"))
+               .andExpect(model().attributeHasFieldErrors("goods", "name"))
+               .andExpect(view().name("goods_page"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void updateGoods_shouldHasNameFieldErrors_whenNameIsNull() throws Exception {
+        mockMvc.perform(post("/goods/{id}", 1)
+                            .param("price", "12"))
+               .andExpect(model().attributeHasFieldErrors("goods", "name"))
+               .andExpect(view().name("goods_page"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void updateGoods_shouldHasPriceFieldErrors_whenPriceValueIsLessThanOne() throws Exception {
+        mockMvc.perform(post("/goods/{id}", 1)
+                            .param("name", "Bob")
+                            .param("price", "-1"))
+               .andExpect(model().attributeHasFieldErrors("goods", "price"))
+               .andExpect(view().name("goods_page"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void updateGoods_shouldHasPriceFieldErrors_whenPriceValueIsNull() throws Exception {
+        mockMvc.perform(post("/goods/{id}", 1)
+                            .param("name", "Bob")
+                            .param("price", ""))
+               .andExpect(model().attributeHasFieldErrors("goods", "price"))
+               .andExpect(view().name("goods_page"))
+               .andExpect(status().isOk())
+               .andDo(print());
+    }
+
+    @Test
+    void updateGoods_shouldHasNoErrorsAndRedirectToPage_whenNameAndPriceAreValid() throws Exception {
+        mockMvc.perform(post("/goods/{id}", 1)
+                            .param("name", "Bean")
+                            .param("price", "12"))
+               .andExpect(model().attributeHasNoErrors())
+               .andExpect(redirectedUrl("/goods/1"))
+               .andExpect(status().is3xxRedirection())
+               .andDo(print());
+    }
 }
