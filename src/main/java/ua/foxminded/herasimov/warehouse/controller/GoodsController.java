@@ -52,7 +52,7 @@ public class GoodsController {
         return "goods_page";
     }
 
-    @PostMapping("/goods_update")
+    @PostMapping("/goods/{id}")
     public String updateGoods(@Valid @ModelAttribute("goods") Goods goods, BindingResult result) {
         if (result.hasErrors()) {
             return "goods_page";

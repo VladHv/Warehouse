@@ -42,7 +42,7 @@
     </div>
 </nav>
 
-<form class="row w-25 p-5 mx-auto" th:action="@{/goods_update}" th:object="${goods}" th:method="POST">
+<form class="row w-25 p-5 mx-auto" th:action="@{/goods/{id} (id=${goods.id})}" th:object="${goods}" th:method="POST">
 
     <div class="form-group">
         <div class="col-12 text-center">
