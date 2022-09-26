@@ -3,12 +3,15 @@ package ua.foxminded.herasimov.warehouse.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import ua.foxminded.herasimov.warehouse.model.Goods;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsServiceImpl;
+
+import javax.validation.Valid;
 
 @Controller
 public class GoodsController {
@@ -28,7 +31,11 @@ public class GoodsController {
     }
 
     @PostMapping("/goods")
-    public String createGoods(@ModelAttribute("goods") Goods goods) {
+    public String createGoods(@Valid @ModelAttribute("goods") Goods goods, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("goodsList", service.findAll());
+            return "goods";
+        }
         service.create(goods);
         return "redirect:/goods";
     }
@@ -46,7 +53,10 @@ public class GoodsController {
     }
 
     @PostMapping("/goods/{id}")
-    public String updateGoods(@ModelAttribute("goods") Goods goods) {
+    public String updateGoods(@Valid @ModelAttribute("goods") Goods goods, BindingResult result) {
+        if (result.hasErrors()) {
+            return "goods_page";
+        }
         service.update(goods);
         return "redirect:/goods/{id}";
     }

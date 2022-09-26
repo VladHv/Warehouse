@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.foxminded.herasimov.warehouse.dao.GoodsItemDao;
 import ua.foxminded.herasimov.warehouse.dao.OrderDao;
-import ua.foxminded.herasimov.warehouse.dao.SupplierDao;
 import ua.foxminded.herasimov.warehouse.exception.ServiceException;
-import ua.foxminded.herasimov.warehouse.model.*;
+import ua.foxminded.herasimov.warehouse.model.GoodsItem;
+import ua.foxminded.herasimov.warehouse.model.Order;
+import ua.foxminded.herasimov.warehouse.model.OrderItem;
+import ua.foxminded.herasimov.warehouse.model.OrderStatus;
 import ua.foxminded.herasimov.warehouse.service.OrderService;
 
 import java.util.List;
@@ -16,14 +18,11 @@ import java.util.Set;
 public class OrderServiceImpl implements OrderService {
 
     private OrderDao orderDao;
-    private SupplierDao supplierDao;
     private GoodsItemDao goodsItemDao;
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao, SupplierDao supplierDao,
-                            GoodsItemDao goodsItemDao) {
+    public OrderServiceImpl(OrderDao orderDao, GoodsItemDao goodsItemDao) {
         this.orderDao = orderDao;
-        this.supplierDao = supplierDao;
         this.goodsItemDao = goodsItemDao;
     }
 
@@ -66,17 +65,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order getUnregisteredOrder() {
         return orderDao.findByStatusIsNull().orElseGet(() -> orderDao.save(new Order()));
-    }
-
-    @Override
-    public void setSupplierAndStatusNew(Integer orderId, Integer supplierId) {
-        Order order = orderDao.findById(orderId).orElseThrow(
-            () -> new ServiceException("Order not found by ID to set status NEW and add supplier. ID:" + orderId));
-        Supplier supplier = supplierDao.findById(supplierId).orElseThrow(
-            () -> new ServiceException("Supplier #" + supplierId + " not found to add it to order #" + orderId));
-        order.setStatus(OrderStatus.NEW);
-        order.setSupplier(supplier);
-        orderDao.save(order);
     }
 
     @Override

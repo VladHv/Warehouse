@@ -8,8 +8,6 @@ public interface OrderService extends Service<Integer, Order> {
 
     Order getUnregisteredOrder();
 
-    void setSupplierAndStatusNew(Integer orderId, Integer supplierId);
-
     List<Order> findAllCreatedOrder();
 
     void setStatusInProcess(Integer id);

@@ -2,14 +2,21 @@ package ua.foxminded.herasimov.warehouse.dto.impl;
 
 import ua.foxminded.herasimov.warehouse.dto.Dto;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 public class GoodsItemDto implements Dto {
 
     private Integer id;
+
+    @NotNull(message = "Choose goods!")
     private Integer goodsId;
     private String goodsName;
     private Integer goodsPrice;
+
+    @NotNull(message = "Input amount!")
+    @Min(value = 1, message = "Amount should be at least one")
     private Integer amount;
     private Integer totalPrice;
 
