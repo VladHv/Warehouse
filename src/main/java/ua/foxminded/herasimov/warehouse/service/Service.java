@@ -8,7 +8,7 @@ public interface Service<K extends Number, T> {
 
     T findById(K id);
 
-    void update(T entity);
+    T update(T entity, K id);
 
     void delete(K id);
 

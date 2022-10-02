@@ -30,16 +30,18 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public void update(Goods entity) {
-        Goods goodsFromDb = dao.findById(entity.getId()).orElseThrow(
+    public Goods update(Goods entity, Integer id) {
+        Goods goodsFromDb = dao.findById(id).orElseThrow(
             () -> new ServiceException("Goods for update not found by ID: " + entity.getId()));
         goodsFromDb.setName(entity.getName());
         goodsFromDb.setPrice(entity.getPrice());
-        dao.save(goodsFromDb);
+        return dao.save(goodsFromDb);
     }
 
     @Override
     public void delete(Integer id) {
+        dao.findById(id).orElseThrow(
+            () -> new ServiceException("Goods for delete not found by ID: " + id));
         dao.deleteById(id);
     }
 
