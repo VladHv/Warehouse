@@ -91,8 +91,11 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Override
     public OrderItem findByIdOnOrder(Integer orderItemId, Integer orderId) {
-        orderDao.findById(orderId).orElseThrow(
+        Order order = orderDao.findById(orderId).orElseThrow(
             () -> new ServiceException("Order not found by ID: " + orderId));
+        order.getOrderItems().stream()
+             .filter(orderItem -> orderItem.getId().equals(orderItemId))
+             .findFirst().orElseThrow(() -> new ServiceException("Order has no order items with id: " + orderItemId));
         return findById(orderItemId);
     }
 }

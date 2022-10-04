@@ -28,7 +28,7 @@ public class SupplierController {
     @GetMapping
     public ResponseEntity<List<Supplier>> findAllSuppliers() {
         List<Supplier> suppliers = service.findAll();
-        if (suppliers != null && suppliers.isEmpty()) {
+        if (suppliers != null && !suppliers.isEmpty()) {
             return new ResponseEntity<>(suppliers, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
