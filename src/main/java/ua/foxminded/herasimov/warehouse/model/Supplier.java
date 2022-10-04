@@ -1,5 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -8,6 +10,7 @@ import java.util.Set;
 @Entity
 public class Supplier extends Person {
 
+    @JsonIgnore
     @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY)
     private Set<Order> orders;
 
