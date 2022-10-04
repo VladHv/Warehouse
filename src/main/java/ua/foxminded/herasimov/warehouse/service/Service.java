@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface Service<K extends Number, T> {
 
-    void create(T entity);
+    T create(T entity);
 
     T findById(K id);
 

@@ -1,6 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import java.util.Objects;
 
 @Entity
@@ -18,6 +19,7 @@ public class OrderItem {
     @JoinColumn(name = "goods_id")
     private Goods goods;
 
+    @Min(1)
     private Integer amount;
 
     public static class Builder {

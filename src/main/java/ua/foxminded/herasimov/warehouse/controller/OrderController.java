@@ -1,73 +1,114 @@
 package ua.foxminded.herasimov.warehouse.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 import ua.foxminded.herasimov.warehouse.model.Order;
+import ua.foxminded.herasimov.warehouse.model.OrderItem;
+import ua.foxminded.herasimov.warehouse.service.impl.OrderItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderServiceImpl;
 
+import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/orders")
 public class OrderController {
 
-    private OrderServiceImpl orderService;
+    private final OrderServiceImpl orderService;
+    private final OrderItemServiceImpl orderItemService;
 
     @Autowired
-    public OrderController(OrderServiceImpl orderService) {
+    public OrderController(OrderServiceImpl orderService,
+                           OrderItemServiceImpl orderItemService) {
         this.orderService = orderService;
+        this.orderItemService = orderItemService;
     }
 
-    @GetMapping("/orders")
-    public String showAllOrders(Model model) {
-        model.addAttribute("orders", orderService.findAll());
-        return "orders";
+    @GetMapping
+    public ResponseEntity<List<Order>> findAllOrders() {
+        List<Order> orders = orderService.findAll();
+        if (orders != null && !orders.isEmpty()) {
+            return new ResponseEntity<>(orders, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @GetMapping("/order_delete/{id}")
-    public String deleteOrder(@PathVariable("id") Integer id){
+    @PostMapping
+    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
+        return new ResponseEntity<>(orderService.create(order), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteOrder(@PathVariable("id") Integer id) {
         orderService.delete(id);
-        return "redirect:/orders";
+        return new ResponseEntity<>("Order deleted successfully", HttpStatus.OK);
     }
 
-    @GetMapping("/supplier_orders")
-    public String showSupplierOrders(Model model) {
-        List<Order> orders = orderService.findOrdersForSupplier();
-        model.addAttribute("orders", orders);
-        return "supplier_orders";
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(@PathVariable("id") Integer id, @RequestBody Order order) {
+        return new ResponseEntity<>(orderService.update(order, id), HttpStatus.OK);
     }
 
-    @GetMapping("/warehouse_orders")
-    public String showActiveOrders(Model model) {
-        List<Order> orders = orderService.findAllCreatedOrder();
-        model.addAttribute("orders", orders);
-        return "warehouse_orders";
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> findOrderById(@PathVariable("id") Integer id) {
+        return new ResponseEntity<>(orderService.findById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/take_order/{id}")
-    public String takeOrderToWork(@PathVariable("id") Integer orderId){
-        orderService.setStatusInProcess(orderId);
-        return "redirect:/supplier_orders";
+    @GetMapping("/{orderId}/orderItems")
+    public ResponseEntity<List<OrderItem>> findAllOrderItemsFromOrder(@PathVariable("orderId") Integer orderId) {
+        List<OrderItem> orderItems = orderItemService.findAllFromOrder(orderId);
+        if (orderItems != null && !orderItems.isEmpty()) {
+            return new ResponseEntity<>(orderItems, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @GetMapping("/complete_order/{id}")
-    public String completeOrder(@PathVariable("id") Integer orderId){
-        orderService.setStatusCompleted(orderId);
-        return "redirect:/supplier_orders";
+    @PostMapping("/{orderId}/orderItems")
+    public ResponseEntity<String> createOrderItemsOnOrder(@PathVariable("orderId") Integer orderId,
+                                                          @Valid @RequestBody OrderItem orderItem) {
+        orderItemService.createOnOrder(orderItem, orderId);
+        return new ResponseEntity<>("OrderItem is valid", HttpStatus.CREATED);
     }
 
-    @GetMapping("/cancel_order/{id}")
-    public String cancelOrder(@PathVariable("id") Integer orderId){
-        orderService.setStatusCancel(orderId);
-        return "redirect:/warehouse_orders";
+    @DeleteMapping("/{orderId}/orderItems/{orderItemId}")
+    public ResponseEntity<String> deleteOrderItemsFromOrder(@PathVariable("orderId") Integer orderId,
+                                                            @PathVariable("orderItemId") Integer orderItemId) {
+        orderItemService.deleteFromOrder(orderItemId, orderId);
+        return new ResponseEntity<>("OrderItem deleted successfully", HttpStatus.OK);
     }
 
-    @GetMapping("/close_order/{id}")
-    public String closeOrder(@PathVariable("id") Integer orderId){
-        orderService.closeCompletedOrder(orderId);
-        return "redirect:/warehouse_orders";
+    @PutMapping("/{orderId}/orderItems/{orderItemId}")
+    public ResponseEntity<String> updateOrderItemsOnOrder(@PathVariable("orderId") Integer orderId,
+                                                          @PathVariable("orderItemId") Integer orderItemId,
+                                                          @Valid @RequestBody OrderItem orderItem) {
+        orderItemService.updateOnOrder(orderItem, orderItemId, orderId);
+        return new ResponseEntity<>("OrderItem is valid", HttpStatus.CREATED);
     }
 
+    @GetMapping("/{orderId}/orderItems/{orderItemId}")
+    public ResponseEntity<OrderItem> findOrderItemsByIdOnOrder(@PathVariable("orderId") Integer orderId,
+                                                               @PathVariable("orderItemId") Integer orderItemId) {
+        return new ResponseEntity<>(orderItemService.findByIdOnOrder(orderItemId, orderId), HttpStatus.OK);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+        MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
 }

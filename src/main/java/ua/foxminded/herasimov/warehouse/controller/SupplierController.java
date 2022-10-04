@@ -1,65 +1,74 @@
 package ua.foxminded.herasimov.warehouse.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/suppliers")
 public class SupplierController {
 
-    private SupplierServiceImpl service;
+    private final SupplierServiceImpl service;
 
     @Autowired
     public SupplierController(SupplierServiceImpl service) {
         this.service = service;
     }
 
-    @GetMapping("/suppliers")
-    public String showSuppliers(Model model) {
-        model.addAttribute("suppliers", service.findAll());
-        model.addAttribute("supplier", new Supplier());
-        return "suppliers";
+    @GetMapping
+    public ResponseEntity<List<Supplier>> findAllSuppliers() {
+        List<Supplier> suppliers = service.findAll();
+        if (suppliers != null && suppliers.isEmpty()) {
+            return new ResponseEntity<>(suppliers, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PostMapping("/suppliers")
-    public String createSupplier(@Valid @ModelAttribute("supplier") Supplier supplier, BindingResult result,
-                                 Model model) {
-        if(result.hasErrors()){
-            model.addAttribute("suppliers", service.findAll());
-            return "suppliers";
-        }
+    @PostMapping
+    public ResponseEntity<String> createSupplier(@Valid @RequestBody Supplier supplier) {
         service.create(supplier);
-        return "redirect:/suppliers";
+        return new ResponseEntity<>("Supplier is valid", HttpStatus.CREATED);
     }
 
-    @GetMapping("/suppliers/delete/{id}")
-    public String deleteSupplier(@PathVariable("id") Integer id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteSupplier(@PathVariable("id") Integer id) {
         service.delete(id);
-        return "redirect:/suppliers";
+        return new ResponseEntity<>("Supplier deleted successfully", HttpStatus.OK);
     }
 
-    @GetMapping("/suppliers/{id}")
-    public String showSupplierById(@PathVariable("id") Integer id, Model model) {
-        model.addAttribute("supplier", service.findById(id));
-        return "supplier_page";
+    @GetMapping("/{id}")
+    public ResponseEntity<Supplier> findSupplierById(@PathVariable("id") Integer id) {
+        return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/suppliers/{id}")
-    public String updateSupplier(@Valid @ModelAttribute("supplier") Supplier supplier, BindingResult result) {
-        if(result.hasErrors()){
-            return "supplier_page";
-        }
-        service.update(supplier);
-        return "redirect:/suppliers/{id}";
+    @PutMapping("/{id}")
+    public ResponseEntity<Supplier> updateSupplier(@PathVariable("id") Integer id,
+                                                   @Valid @ModelAttribute("supplier") Supplier supplier) {
+        return new ResponseEntity<>(service.update(supplier, id), HttpStatus.OK);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+        MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 
 }
