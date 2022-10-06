@@ -1,9 +1,8 @@
 package ua.foxminded.herasimov.warehouse.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -25,6 +24,10 @@ public class Goods {
     @Min(value = 1, message = "Price should be at least one dollar")
     private Integer price;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "goods", cascade = CascadeType.ALL)
+    private GoodsItem goodsItem;
+
     public static class Builder {
         private Goods newGoods;
 
@@ -44,6 +47,11 @@ public class Goods {
 
         public Builder withPrice(Integer price) {
             newGoods.price = price;
+            return this;
+        }
+
+        public Builder withGoodsItem(GoodsItem goodsItem) {
+            newGoods.goodsItem = goodsItem;
             return this;
         }
 
@@ -76,17 +84,32 @@ public class Goods {
         this.price = price;
     }
 
+    public GoodsItem getGoodsItem() {
+        return goodsItem;
+    }
+
+    public void setGoodsItem(GoodsItem goodsItem) {
+        this.goodsItem = goodsItem;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Goods goods = (Goods) o;
-        return Objects.equals(name, goods.name) && Objects.equals(price, goods.price);
+
+        if (!Objects.equals(name, goods.name)) return false;
+        if (!Objects.equals(price, goods.price)) return false;
+        return Objects.equals(goodsItem, goods.goodsItem);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, price);
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (price != null ? price.hashCode() : 0);
+        result = 31 * result + (goodsItem != null ? goodsItem.hashCode() : 0);
+        return result;
     }
 
     @Override

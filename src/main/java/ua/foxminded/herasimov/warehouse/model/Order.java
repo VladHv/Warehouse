@@ -15,13 +15,13 @@ public class Order {
     private Integer id;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<OrderItem> orderItems;
 
     @Enumerated(EnumType.ORDINAL)
     private OrderStatus status;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 

@@ -1,6 +1,8 @@
 package ua.foxminded.herasimov.warehouse.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
@@ -9,9 +11,14 @@ public class GoodsItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @ManyToOne
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goods_id")
+    @NotNull(message = "Choose goods!")
     private Goods goods;
+
+    @NotNull(message = "Input amount!")
+    @Min(value = 1, message = "Amount should be at least one")
     private Integer amount;
 
     public static class Builder {

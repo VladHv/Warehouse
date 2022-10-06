@@ -72,7 +72,7 @@ public class OrderController {
     }
 
     @PostMapping("/{orderId}/orderItems")
-    public ResponseEntity<String> createOrderItemsOnOrder(@PathVariable("orderId") Integer orderId,
+    public ResponseEntity<String> createOrderItemsInOrder(@PathVariable("orderId") Integer orderId,
                                                           @Valid @RequestBody OrderItem orderItem) {
         orderItemService.createOnOrder(orderItem, orderId);
         return new ResponseEntity<>("OrderItem is valid", HttpStatus.CREATED);
@@ -86,7 +86,7 @@ public class OrderController {
     }
 
     @PutMapping("/{orderId}/orderItems/{orderItemId}")
-    public ResponseEntity<String> updateOrderItemsOnOrder(@PathVariable("orderId") Integer orderId,
+    public ResponseEntity<String> updateOrderItemsInOrder(@PathVariable("orderId") Integer orderId,
                                                           @PathVariable("orderItemId") Integer orderItemId,
                                                           @Valid @RequestBody OrderItem orderItem) {
         orderItemService.updateOnOrder(orderItem, orderItemId, orderId);
@@ -94,7 +94,7 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}/orderItems/{orderItemId}")
-    public ResponseEntity<OrderItem> findOrderItemsByIdOnOrder(@PathVariable("orderId") Integer orderId,
+    public ResponseEntity<OrderItem> findOrderItemsByIdInOrder(@PathVariable("orderId") Integer orderId,
                                                                @PathVariable("orderItemId") Integer orderItemId) {
         return new ResponseEntity<>(orderItemService.findByIdOnOrder(orderItemId, orderId), HttpStatus.OK);
     }
