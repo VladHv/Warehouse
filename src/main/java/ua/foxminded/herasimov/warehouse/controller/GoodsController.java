@@ -4,24 +4,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ua.foxminded.herasimov.warehouse.model.Goods;
-import ua.foxminded.herasimov.warehouse.service.GoodsService;
+import ua.foxminded.herasimov.warehouse.service.impl.GoodsServiceImpl;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/goods")
+@Validated
 public class GoodsController {
 
-    private final GoodsService service;
+    private final GoodsServiceImpl service;
 
     @Autowired
-    public GoodsController(GoodsService service) {
+    public GoodsController(GoodsServiceImpl service) {
         this.service = service;
     }
 
@@ -42,9 +46,11 @@ public class GoodsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteGoods(@PathVariable("id") Integer id) {
+    public ResponseEntity<String> deleteGoods(@PathVariable("id") Integer id,
+                                              @Size(min = 2, max = 5, message = "Length should be from 2 to 5")
+                                              @RequestParam(value = "message", required = false) String message) {
         service.delete(id);
-        return new ResponseEntity<>("Goods deleted successfully", HttpStatus.OK);
+        return new ResponseEntity<>("Goods deleted successfully" + message, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -68,5 +74,11 @@ public class GoodsController {
             errors.put(fieldName, errorMessage);
         });
         return errors;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
