@@ -77,25 +77,34 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     @Override
     public void deleteFromOrder(Integer orderItemId, Integer orderId) {
-        orderDao.findById(orderId).orElseThrow(
-            () -> new ServiceException("Order not found by ID: " + orderId));
-        delete(orderItemId);
+        if (isOrderItemPresentInOrder(orderItemId, orderId)) {
+            delete(orderItemId);
+        } else {
+            throw new ServiceException("OrderItem with ID "+ orderItemId +" not found in order id " + orderId);
+        }
     }
 
     @Override
     public OrderItem updateOnOrder(OrderItem orderItem, Integer orderItemId, Integer orderId) {
-        orderDao.findById(orderId).orElseThrow(
-            () -> new ServiceException("Order not found by ID: " + orderId));
-        return update(orderItem, orderItemId);
+        if (isOrderItemPresentInOrder(orderItemId, orderId)) {
+            return update(orderItem, orderItemId);
+        } else {
+            throw new ServiceException("OrderItem with ID "+ orderItemId +" not found in order id " + orderId);
+        }
     }
 
     @Override
     public OrderItem findByIdOnOrder(Integer orderItemId, Integer orderId) {
-        Order order = orderDao.findById(orderId).orElseThrow(
-            () -> new ServiceException("Order not found by ID: " + orderId));
-        order.getOrderItems().stream()
-             .filter(orderItem -> orderItem.getId().equals(orderItemId))
-             .findFirst().orElseThrow(() -> new ServiceException("Order has no order items with id: " + orderItemId));
-        return findById(orderItemId);
+        if (isOrderItemPresentInOrder(orderItemId, orderId)) {
+            return findById(orderItemId);
+        } else {
+            throw new ServiceException("OrderItem with ID "+ orderItemId +" not found in order id " + orderId);
+        }
+    }
+
+    private boolean isOrderItemPresentInOrder(Integer orderItemId, Integer orderId) {
+        return orderDao.findById(orderId).orElseThrow(() -> new ServiceException("Order not found by ID: " + orderId))
+                       .getOrderItems().stream()
+                       .anyMatch(item -> item.getId().equals(orderItemId));
     }
 }
