@@ -6,8 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDto;
-import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.model.GoodsItem;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
 
@@ -21,12 +19,10 @@ import java.util.Map;
 public class GoodsItemController {
 
     private final GoodsItemServiceImpl service;
-    private final GoodsItemDtoMapper dtoMapper;
 
     @Autowired
-    public GoodsItemController(GoodsItemServiceImpl service, GoodsItemDtoMapper dtoMapper) {
+    public GoodsItemController(GoodsItemServiceImpl service) {
         this.service = service;
-        this.dtoMapper = dtoMapper;
     }
 
     @GetMapping
@@ -40,8 +36,8 @@ public class GoodsItemController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createGoodsItem(@Valid @RequestBody GoodsItemDto goodsItemDto) {
-        service.create(dtoMapper.toEntity(goodsItemDto));
+    public ResponseEntity<String> createGoodsItem(@Valid @RequestBody GoodsItem goodsItem) {
+        service.create(goodsItem);
         return new ResponseEntity<>("GoodsItem is valid", HttpStatus.CREATED);
     }
 
@@ -58,8 +54,8 @@ public class GoodsItemController {
 
     @PutMapping("{id}")
     public ResponseEntity<GoodsItem> updateGoodsItem(@PathVariable("id") Integer id,
-                                                     @Valid @RequestBody GoodsItemDto goodsItemDto) {
-        return new ResponseEntity<>(service.update(dtoMapper.toEntity(goodsItemDto), id), HttpStatus.OK);
+                                                     @Valid @RequestBody GoodsItem goodsItem) {
+        return new ResponseEntity<>(service.update(goodsItem, id), HttpStatus.OK);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
