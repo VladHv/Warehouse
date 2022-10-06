@@ -12,7 +12,7 @@ public class GoodsItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "goods_id")
     @NotNull(message = "Choose goods!")
     private Goods goods;
@@ -83,5 +83,14 @@ public class GoodsItem {
     @Override
     public int hashCode() {
         return Objects.hash(goods, amount);
+    }
+
+    @Override
+    public String toString() {
+        return "GoodsItem{" +
+               "id=" + id +
+               ", goods=" + goods +
+               ", amount=" + amount +
+               '}';
     }
 }
