@@ -4,11 +4,11 @@ import java.util.List;
 
 public interface Service<K extends Number, T> {
 
-    void create(T entity);
+    T create(T entity);
 
     T findById(K id);
 
-    void update(T entity);
+    T update(T entity, K id);
 
     void delete(K id);
 

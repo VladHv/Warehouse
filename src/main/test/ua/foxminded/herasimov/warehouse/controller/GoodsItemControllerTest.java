@@ -9,7 +9,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsServiceImpl;
 
@@ -20,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = GoodsItemController.class)
 @MockBeans(
-    {@MockBean(GoodsItemServiceImpl.class), @MockBean(GoodsServiceImpl.class), @MockBean(GoodsItemDtoMapper.class)})
+    {@MockBean(GoodsItemServiceImpl.class), @MockBean(GoodsServiceImpl.class)})
 class GoodsItemControllerTest {
 
     @Autowired
@@ -72,7 +71,7 @@ class GoodsItemControllerTest {
                .andExpect(status().is3xxRedirection())
                .andDo(print());
     }
-    
+
     @Test
     void updateGoodsItem_shouldHasGoodIdFieldError_whenGoodsIdIsNull() throws Exception {
         mockMvc.perform(post("/warehouse_goods/{id}", 1)

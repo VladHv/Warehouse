@@ -1,63 +1,84 @@
 package ua.foxminded.herasimov.warehouse.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
 import ua.foxminded.herasimov.warehouse.model.Goods;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsServiceImpl;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/goods")
+@Validated
 public class GoodsController {
 
-    private GoodsServiceImpl service;
+    private final GoodsServiceImpl service;
 
     @Autowired
     public GoodsController(GoodsServiceImpl service) {
         this.service = service;
     }
 
-    @GetMapping("/goods")
-    public String showOrders(Model model) {
-        model.addAttribute("goodsList", service.findAll());
-        model.addAttribute("goods", new Goods());
-        return "goods";
+    @GetMapping
+    public ResponseEntity<List<Goods>> getAllGoods() {
+        List<Goods> goods = service.findAll();
+        if (goods != null && !goods.isEmpty()) {
+            return new ResponseEntity<>(goods, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PostMapping("/goods")
-    public String createGoods(@Valid @ModelAttribute("goods") Goods goods, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("goodsList", service.findAll());
-            return "goods";
-        }
+    @PostMapping
+    public ResponseEntity<String> createGoods(@Valid @RequestBody Goods goods) {
         service.create(goods);
-        return "redirect:/goods";
+        return new ResponseEntity<>("Goods is valid", HttpStatus.CREATED);
     }
 
-    @GetMapping("/goods/delete/{id}")
-    public String deleteGoods(@PathVariable("id") Integer id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteGoods(@PathVariable("id") Integer id,
+                                              @Size(min = 2, max = 5, message = "Length should be from 2 to 5")
+                                              @RequestParam(value = "message", required = false) String message) {
         service.delete(id);
-        return "redirect:/goods";
+        return new ResponseEntity<>("Goods deleted successfully" + message, HttpStatus.OK);
     }
 
-    @GetMapping("/goods/{id}")
-    public String showGoodsById(@PathVariable("id") Integer id, Model model) {
-        model.addAttribute("goods", service.findById(id));
-        return "goods_page";
+    @GetMapping("/{id}")
+    public ResponseEntity<Goods> findGoodsById(@PathVariable("id") Integer id) {
+        return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/goods/{id}")
-    public String updateGoods(@Valid @ModelAttribute("goods") Goods goods, BindingResult result) {
-        if (result.hasErrors()) {
-            return "goods_page";
-        }
-        service.update(goods);
-        return "redirect:/goods/{id}";
+    @PutMapping("/{id}")
+    public ResponseEntity<Goods> updateGoods(@PathVariable("id") Integer id, @Valid @RequestBody Goods goods) {
+        return new ResponseEntity<>(service.update(goods, id), HttpStatus.OK);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+        MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        return new ResponseEntity<>("not valid due to validation error: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

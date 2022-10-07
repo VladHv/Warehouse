@@ -2,7 +2,6 @@ package ua.foxminded.herasimov.warehouse.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ua.foxminded.herasimov.warehouse.dao.OrderDao;
 import ua.foxminded.herasimov.warehouse.dao.OrderItemDao;
 import ua.foxminded.herasimov.warehouse.exception.ServiceException;
@@ -11,13 +10,12 @@ import ua.foxminded.herasimov.warehouse.model.OrderItem;
 import ua.foxminded.herasimov.warehouse.service.OrderItemService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class OrderItemServiceImpl implements OrderItemService {
 
-    private OrderItemDao orderItemDao;
-    private OrderDao orderDao;
+    private final OrderItemDao orderItemDao;
+    private final OrderDao orderDao;
 
     @Autowired
     public OrderItemServiceImpl(OrderItemDao orderItemDao, OrderDao orderDao) {
@@ -26,15 +24,8 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
-    public void create(OrderItem entity) {
-        Optional<OrderItem> existingOrderItem = orderItemDao.findByOrderAndGoods(entity.getOrder(), entity.getGoods());
-        if (existingOrderItem.isPresent()) {
-            OrderItem orderItem = existingOrderItem.get();
-            orderItem.setAmount(orderItem.getAmount() + entity.getAmount());
-            orderItemDao.save(orderItem);
-        } else {
-            orderItemDao.save(entity);
-        }
+    public OrderItem create(OrderItem entity) {
+        return orderItemDao.save(entity);
     }
 
     @Override
@@ -43,17 +34,19 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
-    public void update(OrderItem entity) {
-        OrderItem orderItemFromDb = orderItemDao.findById(entity.getId()).orElseThrow(
-                () -> new ServiceException("OrderItem for update not found by ID: " + entity.getId()));
+    public OrderItem update(OrderItem entity, Integer id) {
+        OrderItem orderItemFromDb = orderItemDao.findById(id).orElseThrow(
+            () -> new ServiceException("OrderItem for update not found by ID: " + id));
         orderItemFromDb.setOrder(entity.getOrder());
         orderItemFromDb.setGoods(entity.getGoods());
         orderItemFromDb.setAmount(entity.getAmount());
-        orderItemDao.save(orderItemFromDb);
+        return orderItemDao.save(orderItemFromDb);
     }
 
     @Override
     public void delete(Integer id) {
+        orderItemDao.findById(id).orElseThrow(
+            () -> new ServiceException("OrderItem for delete not found by ID: " + id));
         orderItemDao.deleteById(id);
     }
 
@@ -68,11 +61,50 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
-    @Transactional
-    public void cancelOrderItemsOfOrder(Integer orderId) {
+    public List<OrderItem> findAllFromOrder(Integer orderId) {
+        orderDao.findById(orderId).orElseThrow(
+            () -> new ServiceException("Order not found by ID: " + orderId));
+        return orderItemDao.findAllByOrderId(orderId);
+    }
+
+    @Override
+    public OrderItem createOnOrder(OrderItem orderItem, Integer orderId) {
         Order order = orderDao.findById(orderId).orElseThrow(
-                () -> new ServiceException(
-                        "Order for order items removing not found by ID:" + orderId));
-        orderItemDao.deleteByOrder(order);
+            () -> new ServiceException("Order not found by ID: " + orderId));
+        orderItem.setOrder(order);
+        return create(orderItem);
+    }
+
+    @Override
+    public void deleteFromOrder(Integer orderItemId, Integer orderId) {
+        if (isOrderItemPresentInOrder(orderItemId, orderId)) {
+            delete(orderItemId);
+        } else {
+            throw new ServiceException("OrderItem with ID "+ orderItemId +" not found in order id " + orderId);
+        }
+    }
+
+    @Override
+    public OrderItem updateOnOrder(OrderItem orderItem, Integer orderItemId, Integer orderId) {
+        if (isOrderItemPresentInOrder(orderItemId, orderId)) {
+            return update(orderItem, orderItemId);
+        } else {
+            throw new ServiceException("OrderItem with ID "+ orderItemId +" not found in order id " + orderId);
+        }
+    }
+
+    @Override
+    public OrderItem findByIdOnOrder(Integer orderItemId, Integer orderId) {
+        if (isOrderItemPresentInOrder(orderItemId, orderId)) {
+            return findById(orderItemId);
+        } else {
+            throw new ServiceException("OrderItem with ID "+ orderItemId +" not found in order id " + orderId);
+        }
+    }
+
+    private boolean isOrderItemPresentInOrder(Integer orderItemId, Integer orderId) {
+        return orderDao.findById(orderId).orElseThrow(() -> new ServiceException("Order not found by ID: " + orderId))
+                       .getOrderItems().stream()
+                       .anyMatch(item -> item.getId().equals(orderItemId));
     }
 }

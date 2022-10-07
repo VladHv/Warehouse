@@ -1,79 +1,74 @@
 package ua.foxminded.herasimov.warehouse.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDto;
-import ua.foxminded.herasimov.warehouse.dto.impl.GoodsItemDtoMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
+import ua.foxminded.herasimov.warehouse.model.GoodsItem;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
-import ua.foxminded.herasimov.warehouse.service.impl.GoodsServiceImpl;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/goodsItems")
 public class GoodsItemController {
 
-    private GoodsItemServiceImpl goodsItemService;
-    private GoodsServiceImpl goodsService;
-    private GoodsItemDtoMapper dtoMapper;
+    private final GoodsItemServiceImpl service;
 
     @Autowired
-    public GoodsItemController(GoodsItemServiceImpl goodsItemService,
-                               GoodsServiceImpl goodsService,
-                               GoodsItemDtoMapper dtoMapper) {
-        this.goodsItemService = goodsItemService;
-        this.goodsService = goodsService;
-        this.dtoMapper = dtoMapper;
+    public GoodsItemController(GoodsItemServiceImpl service) {
+        this.service = service;
     }
 
-    @GetMapping("/warehouse_goods")
-    public String showGoodsItems(Model model) {
-        model.addAttribute("goodsItems", goodsItemService.findAll());
-        model.addAttribute("goodsList", goodsService.findAll());
-        model.addAttribute("goodsItem", new GoodsItemDto());
-        return "warehouse_goods";
-    }
-
-    @PostMapping("/warehouse_goods")
-    public String createGoodsItem(@Valid @ModelAttribute("goodsItem") GoodsItemDto goodsItemDto,
-                                  BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("goodsItems", goodsItemService.findAll());
-            model.addAttribute("goodsList", goodsService.findAll());
-            return "warehouse_goods";
+    @GetMapping
+    public ResponseEntity<List<GoodsItem>> getAllGoodsItems() {
+        List<GoodsItem> goodsItems = service.findAll();
+        if (goodsItems != null && !goodsItems.isEmpty()) {
+            return new ResponseEntity<>(goodsItems, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        goodsItemService.create(dtoMapper.toEntity(goodsItemDto));
-        return "redirect:/warehouse_goods";
     }
 
-    @GetMapping("/warehouse_goods/delete/{id}")
-    public String deleteGoodsItem(@PathVariable("id") Integer id) {
-        goodsItemService.delete(id);
-        return "redirect:/warehouse_goods";
+    @PostMapping
+    public ResponseEntity<String> createGoodsItem(@Valid @RequestBody GoodsItem goodsItem) {
+        service.create(goodsItem);
+        return new ResponseEntity<>("GoodsItem is valid", HttpStatus.CREATED);
     }
 
-    @GetMapping("/warehouse_goods/{id}")
-    public String showGoodsItemById(@PathVariable("id") Integer id, Model model) {
-        model.addAttribute("goodsItem", dtoMapper.toDto(goodsItemService.findById(id)));
-        model.addAttribute("goodsList", goodsService.findAll());
-        return "warehouse_goods_page";
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteGoodsItem(@PathVariable("id") Integer id) {
+        service.delete(id);
+        return new ResponseEntity<>("GoodsItem deleted successfully", HttpStatus.OK);
     }
 
-    @PostMapping("/warehouse_goods/{id}")
-    public String updateGoodsItem(@Valid @ModelAttribute("goodsItem") GoodsItemDto goodsItemDto,
-                                  BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("goodsList", goodsService.findAll());
-            return "warehouse_goods_page";
-        }
-        goodsItemService.update(dtoMapper.toEntity(goodsItemDto));
-        return "redirect:/warehouse_goods/{id}";
+    @GetMapping("/{id}")
+    public ResponseEntity<GoodsItem> findGoodsItemById(@PathVariable("id") Integer id) {
+        return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
     }
 
+    @PutMapping("{id}")
+    public ResponseEntity<GoodsItem> updateGoodsItem(@PathVariable("id") Integer id,
+                                                     @Valid @RequestBody GoodsItem goodsItem) {
+        return new ResponseEntity<>(service.update(goodsItem, id), HttpStatus.OK);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(
+        MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
 
 }

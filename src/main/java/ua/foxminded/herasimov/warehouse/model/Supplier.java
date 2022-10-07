@@ -1,5 +1,8 @@
 package ua.foxminded.herasimov.warehouse.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -8,7 +11,8 @@ import java.util.Set;
 @Entity
 public class Supplier extends Person {
 
-    @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY)
+    @JsonIgnore
+    @OneToMany(mappedBy = "supplier", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Order> orders;
 
     public static final class Builder extends Person.ABuilder<Supplier, Builder> {

@@ -21,8 +21,8 @@ public class SupplierServiceImpl implements SupplierService {
 
 
     @Override
-    public void create(Supplier entity) {
-        dao.save(entity);
+    public Supplier create(Supplier entity) {
+        return dao.save(entity);
     }
 
     @Override
@@ -31,17 +31,19 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public void update(Supplier entity) {
-        Supplier supplierFromDb = dao.findById(entity.getId()).orElseThrow(
-            () -> new ServiceException("Supplier for update not found by ID: " + entity.getId()));
+    public Supplier update(Supplier entity, Integer id) {
+        Supplier supplierFromDb = dao.findById(id).orElseThrow(
+            () -> new ServiceException("Supplier for update not found by ID: " + id));
         supplierFromDb.setFirstName(entity.getFirstName());
         supplierFromDb.setLastName(entity.getLastName());
         supplierFromDb.setOrders(entity.getOrders());
-        dao.save(supplierFromDb);
+        return dao.save(supplierFromDb);
     }
 
     @Override
     public void delete(Integer id) {
+        dao.findById(id).orElseThrow(
+            () -> new ServiceException("Supplier for delete not found by ID: " + id));
         dao.deleteById(id);
     }
 

@@ -20,8 +20,8 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public void create(Goods entity) {
-        dao.save(entity);
+    public Goods create(Goods entity) {
+        return dao.save(entity);
     }
 
     @Override
@@ -30,16 +30,18 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public void update(Goods entity) {
-        Goods goodsFromDb = dao.findById(entity.getId()).orElseThrow(
-            () -> new ServiceException("Goods for update not found by ID: " + entity.getId()));
+    public Goods update(Goods entity, Integer id) {
+        Goods goodsFromDb = dao.findById(id).orElseThrow(
+            () -> new ServiceException("Goods for update not found by ID: " + id));
         goodsFromDb.setName(entity.getName());
         goodsFromDb.setPrice(entity.getPrice());
-        dao.save(goodsFromDb);
+        return dao.save(goodsFromDb);
     }
 
     @Override
     public void delete(Integer id) {
+        dao.findById(id).orElseThrow(
+            () -> new ServiceException("Goods for delete not found by ID: " + id));
         dao.deleteById(id);
     }
 
