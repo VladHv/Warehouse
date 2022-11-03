@@ -59,7 +59,8 @@ public class GoodsController {
                                                         type = "Integer",
                                                         value = "ID value for the goods",
                                                         example = "1",
-                                                        required = true) @PathVariable("id") Integer id,
+                                                        required = true)
+                                              @PathVariable("id") Integer id,
                                               @ApiParam("Any message you can add to the end of response message")
                                               @Size(min = 2, max = 5, message = "Length should be from 2 to 5")
                                               @RequestParam(value = "message", required = false) String message) {
@@ -85,7 +86,8 @@ public class GoodsController {
                                                        type = "Integer",
                                                        value = "ID value for the goods",
                                                        example = "1",
-                                                       required = true) @PathVariable("id") Integer id,
+                                                       required = true)
+                                             @PathVariable("id") Integer id,
                                              @ApiParam("Goods to update. Cannot be null or empty")
                                              @Valid @RequestBody Goods goods) {
         return new ResponseEntity<>(service.update(goods, id), HttpStatus.OK);

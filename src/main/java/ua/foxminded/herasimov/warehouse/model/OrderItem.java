@@ -1,5 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.util.Objects;
@@ -9,6 +11,7 @@ public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = "The unique id of the order item", example = "1")
     private Integer id;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -20,6 +23,7 @@ public class OrderItem {
     private Goods goods;
 
     @Min(1)
+    @ApiModelProperty(notes = "The goods' amount in order", example = "66")
     private Integer amount;
 
     public static class Builder {
