@@ -1,6 +1,8 @@
 package ua.foxminded.herasimov.warehouse.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -10,18 +12,22 @@ import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Entity
+@ApiModel(description = "Details about the goods")
 public class Goods {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = "The unique id of the goods", example = "1")
     private Integer id;
 
     @NotBlank(message = "Input name of goods!")
     @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
+    @ApiModelProperty(notes = "The goods' name", example = "Tomato")
     private String name;
 
     @NotNull(message = "Input price!")
     @Min(value = 1, message = "Price should be at least one dollar")
+    @ApiModelProperty(notes = "The goods' price in dollars", example = "59")
     private Integer price;
 
     @JsonIgnore

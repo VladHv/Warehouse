@@ -1,6 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -12,6 +13,7 @@ public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = "The unique id of the order", example = "1")
     private Integer id;
 
     @JsonIgnore
@@ -19,6 +21,7 @@ public class Order {
     private Set<OrderItem> orderItems;
 
     @Enumerated(EnumType.ORDINAL)
+    @ApiModelProperty(notes = "Status of the order")
     private OrderStatus status;
 
     @ManyToOne(cascade = CascadeType.ALL)

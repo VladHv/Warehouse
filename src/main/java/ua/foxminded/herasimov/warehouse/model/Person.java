@@ -1,5 +1,7 @@
 package ua.foxminded.herasimov.warehouse.model;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,14 +15,17 @@ public abstract class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = "The unique id of the person", example = "1")
     protected Integer id;
 
     @NotBlank(message = "First name required")
     @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
+    @ApiModelProperty(notes = "The person's first name", example = "Kevin")
     protected String firstName;
 
     @NotBlank(message = "Last name required")
     @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
+    @ApiModelProperty(notes = "The person's last name", example = "Eddy")
     protected String lastName;
 
     protected Person() {

@@ -1,5 +1,7 @@
 package ua.foxminded.herasimov.warehouse.controller;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,8 @@ public class GoodsController {
         this.service = service;
     }
 
+    @ApiOperation(value = "Find all goods",
+                  notes = "This method returns all goods positions")
     @GetMapping
     public ResponseEntity<List<Goods>> getAllGoods() {
         List<Goods> goods = service.findAll();
@@ -39,27 +43,53 @@ public class GoodsController {
         }
     }
 
+    @ApiOperation(value = "Create new goods",
+                  notes = "This method requires valid goods")
     @PostMapping
-    public ResponseEntity<String> createGoods(@Valid @RequestBody Goods goods) {
+    public ResponseEntity<String> createGoods(@ApiParam("Goods to add. Cannot be null or empty")
+                                              @Valid @RequestBody Goods goods) {
         service.create(goods);
         return new ResponseEntity<>("Goods is valid", HttpStatus.CREATED);
     }
 
+    @ApiOperation(value = "Delete goods by id",
+                  notes = "Remove goods position from warehouse")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteGoods(@PathVariable("id") Integer id,
+    public ResponseEntity<String> deleteGoods(@ApiParam(name = "id",
+                                                        type = "Integer",
+                                                        value = "ID value for the goods",
+                                                        example = "1",
+                                                        required = true)
+                                              @PathVariable("id") Integer id,
+                                              @ApiParam("Any message you can add to the end of response message")
                                               @Size(min = 2, max = 5, message = "Length should be from 2 to 5")
                                               @RequestParam(value = "message", required = false) String message) {
         service.delete(id);
         return new ResponseEntity<>("Goods deleted successfully" + message, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Find goods by id",
+                  notes = "Returns a single goods. Provide an id to look up specific goods")
     @GetMapping("/{id}")
-    public ResponseEntity<Goods> findGoodsById(@PathVariable("id") Integer id) {
+    public ResponseEntity<Goods> findGoodsById(@ApiParam(name = "id",
+                                                         type = "Integer",
+                                                         value = "ID value for the goods",
+                                                         example = "1",
+                                                         required = true) @PathVariable("id") Integer id) {
         return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Update existed goods",
+                  notes = "This method updates valid goods per id")
     @PutMapping("/{id}")
-    public ResponseEntity<Goods> updateGoods(@PathVariable("id") Integer id, @Valid @RequestBody Goods goods) {
+    public ResponseEntity<Goods> updateGoods(@ApiParam(name = "id",
+                                                       type = "Integer",
+                                                       value = "ID value for the goods",
+                                                       example = "1",
+                                                       required = true)
+                                             @PathVariable("id") Integer id,
+                                             @ApiParam("Goods to update. Cannot be null or empty")
+                                             @Valid @RequestBody Goods goods) {
         return new ResponseEntity<>(service.update(goods, id), HttpStatus.OK);
     }
 
@@ -68,7 +98,7 @@ public class GoodsController {
     public Map<String, String> handleValidationExceptions(
         MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+        ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);

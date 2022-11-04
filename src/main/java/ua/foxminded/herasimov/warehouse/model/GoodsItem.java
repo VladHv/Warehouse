@@ -1,15 +1,20 @@
 package ua.foxminded.herasimov.warehouse.model;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
+@ApiModel(description = "Details about the goods item")
 public class GoodsItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @ApiModelProperty(notes = "The unique id of the goods item", example = "1")
     private Integer id;
 
     @OneToOne(cascade = CascadeType.MERGE)
@@ -19,6 +24,7 @@ public class GoodsItem {
 
     @NotNull(message = "Input amount!")
     @Min(value = 1, message = "Amount should be at least one")
+    @ApiModelProperty(notes = "The goods' amount in goods item", example = "55")
     private Integer amount;
 
     public static class Builder {
