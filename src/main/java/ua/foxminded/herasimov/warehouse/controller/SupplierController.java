@@ -83,7 +83,7 @@ public class SupplierController {
                                                              required = true)
                                                    @PathVariable("id") Integer id,
                                                    @ApiParam("Supplier to update. Cannot be null or empty")
-                                                   @Valid @ModelAttribute("supplier") Supplier supplier) {
+                                                   @Valid @RequestBody Supplier supplier) {
         return new ResponseEntity<>(service.update(supplier, id), HttpStatus.OK);
     }
 
