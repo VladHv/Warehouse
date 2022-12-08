@@ -1,5 +1,7 @@
 package ua.foxminded.herasimov.warehouse.controller;
 
+import org.hamcrest.core.Is;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,6 +16,7 @@ import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,183 +34,239 @@ class SupplierControllerTest {
     private SupplierController controller;
 
     @Test
-    void createSupplier_shouldHasStatusBadRequest_whenFirstNameIsBlank() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("firstName", "")
-                            .param("lastName", "Smith"))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    @Test
-    void createSupplier_shouldHasStatusBadRequest_whenFirstNameIsNull() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("lastName", "Smith"))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    @Test
-    void createSupplier_shouldHasStatusBadRequest_whenFirstNameSizeLessThanTwo() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("firstName", "A")
-                            .param("lastName", "Smith"))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    @Test
-    void createSupplier_shouldHasStatusBadRequest_whenFirstNameSizeMoreThanTwoHundredAndFifty() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("firstName", "A".repeat(251))
-                            .param("lastName", "Smith"))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    @Test
-    void createSupplier_shouldHasStatusBadRequest_whenLastNameIsBlank() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("firstName", "Bob")
-                            .param("lastName", ""))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    @Test
-    void createSupplier_shouldHasStatusBadRequest_whenLastNameIsNull() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("firstName", "Bob"))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    @Test
-    void createSupplier_shouldHasStatusBadRequest_whenLastNameSizeLessThanTwo() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("firstName", "Bob")
-                            .param("lastName", "A"))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    @Test
-    void createSupplier_shouldHasStatusBadRequest_whenLastNameSizeMoreThanTwoHundredAndFifty() throws Exception {
-        mockMvc.perform(post("/suppliers")
-                            .param("firstName", "Bob")
-                            .param("lastName", "A".repeat(251)))
-               .andExpect(status().isBadRequest())
-               .andDo(print());
-    }
-
-    // TODO: 07.12.2022 update previous test methods like next one
-
-    @Test
-    void createSupplier_shouldHasNoErrors_whenFirstNameAndLastNameAreValid() throws Exception {
-        MediaType textPlainUtf8 = new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);
-        String supplier = "{\"firstName\": \"Bob\", \"lastName\" : \"Smith\"}";
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameIsBlank() throws Exception {
+        String supplier = new JSONObject().put("firstName", "")
+                                          .put("lastName", "Smith")
+                                          .toString();
         mockMvc.perform(post("/suppliers")
                             .content(supplier)
                             .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("Length should be from 2 to 250")));
+    }
+
+    @Test
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameIsNull() throws Exception {
+        String supplier = new JSONObject().put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("First name required")));
+    }
+
+    @Test
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameSizeLessThanTwo() throws Exception {
+        String supplier = new JSONObject().put("firstName", "A")
+                                          .put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("Length should be from 2 to 250")));
+    }
+
+    @Test
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameSizeMoreThanTwoHundredAndFifty() throws
+        Exception {
+        String supplier = new JSONObject().put("firstName", "A".repeat(251))
+                                          .put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("Length should be from 2 to 250")));
+    }
+
+    @Test
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameIsBlank() throws Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "")
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Length should be from 2 to 250")));
+    }
+
+    @Test
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameIsNull() throws Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Last name required")));
+    }
+
+    @Test
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameSizeLessThanTwo() throws Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "A")
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Length should be from 2 to 250")));
+    }
+
+    @Test
+    void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameSizeMoreThanTwoHundredAndFifty() throws
+        Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "A".repeat(251))
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Length should be from 2 to 250")));
+    }
+
+    @Test
+    void createSupplier_shouldHasNoErrorsAndStatusCreated_whenFirstNameAndLastNameAreValid() throws Exception {
+        MediaType textPlainUtf8 = new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(post("/suppliers")
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
                .andExpect(status().isCreated())
-               .andExpect(content().contentType(textPlainUtf8))
-               .andDo(print());
+               .andExpect(content().contentType(textPlainUtf8));
     }
 
     @Test
-    void updateSupplier_shouldHasFirstNameFieldError_whenFirstNameIsBlank() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "")
-                            .param("lastName", "Smith"))
-               .andExpect(model().attributeHasFieldErrors("supplier", "firstName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameIsBlank() throws Exception {
+        String supplier = new JSONObject().put("firstName", "")
+                                          .put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("Length should be from 2 to 250")));
     }
 
     @Test
-    void updateSupplier_shouldHasFirstNameFieldError_whenFirstNameIsNull() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("lastName", "Smith"))
-               .andExpect(model().attributeHasFieldErrors("supplier", "firstName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameIsNull() throws Exception {
+        String supplier = new JSONObject().put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("First name required")));
     }
 
     @Test
-    void updateSupplier_shouldHasFirstNameFieldError_whenFirstNameSizeLessThanTwo() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "A")
-                            .param("lastName", "Smith"))
-               .andExpect(model().attributeHasFieldErrors("supplier", "firstName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameSizeLessThanTwo() throws Exception {
+        String supplier = new JSONObject().put("firstName", "A")
+                                          .put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("Length should be from 2 to 250")));
     }
 
     @Test
-    void updateSupplier_shouldHasFirstNameFieldError_whenFirstNameSizeMoreThanTwoHundredAndFifty() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "A".repeat(251))
-                            .param("lastName", "Smith"))
-               .andExpect(model().attributeHasFieldErrors("supplier", "firstName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameSizeMoreThanTwoHundredAndFifty() throws
+        Exception {
+        String supplier = new JSONObject().put("firstName", "A".repeat(251))
+                                          .put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.firstName", Is.is("Length should be from 2 to 250")));
     }
 
     @Test
-    void updateSupplier_shouldHasLastNameFieldError_whenLastNameIsBlank() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "Bob")
-                            .param("lastName", ""))
-               .andExpect(model().attributeHasFieldErrors("supplier", "lastName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameIsBlank() throws Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Length should be from 2 to 250")));
     }
 
     @Test
-    void updateSupplier_shouldHasLastNameFieldError_whenLastNameIsNull() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "Bob"))
-               .andExpect(model().attributeHasFieldErrors("supplier", "lastName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameIsNull() throws Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Last name required")));
     }
 
     @Test
-    void updateSupplier_shouldHasLastNameFieldError_whenLastNameSizeLessThanTwo() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "Bob")
-                            .param("lastName", "A"))
-               .andExpect(model().attributeHasFieldErrors("supplier", "lastName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameSizeLessThanTwo() throws Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "A")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Length should be from 2 to 250")));
     }
 
     @Test
-    void updateSupplier_shouldHasLastNameFieldError_whenLastNameSizeMoreThanTwoHundredAndFifty() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "Bob")
-                            .param("lastName", "A".repeat(251)))
-               .andExpect(model().attributeHasFieldErrors("supplier", "lastName"))
-               .andExpect(view().name("supplier_page"))
-               .andExpect(status().isOk())
-               .andDo(print());
+    void updateSupplier_shouldHasStatusBadRequestAndValidationMessage_whenLastNameSizeMoreThanTwoHundredAndFifty() throws
+        Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "A".repeat(251))
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isBadRequest())
+               .andExpect(jsonPath("$.lastName", Is.is("Length should be from 2 to 250")));
     }
 
     @Test
-    void updateSupplier_shouldHasNoErrors_whenFirstNameAndLastNameAreValid() throws Exception {
-        mockMvc.perform(post("/suppliers/{id}", 1)
-                            .param("firstName", "Bob")
-                            .param("lastName", "Smith"))
-               .andExpect(model().attributeHasNoErrors())
-               .andExpect(redirectedUrl("/suppliers/1"))
-               .andExpect(status().is3xxRedirection())
-               .andDo(print());
+    void updateSupplier_shouldHasNoErrorsAndStatusOk_whenFirstNameAndLastNameAreValid() throws Exception {
+        String supplier = new JSONObject().put("firstName", "Bob")
+                                          .put("lastName", "Smith")
+                                          .toString();
+        mockMvc.perform(put("/suppliers/{id}", 1)
+                            .content(supplier)
+                            .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isOk());
     }
+
+    // TODO: 08.12.2022 to test DELETE use andReturn() for MockMvc, see: https://stackoverflow.com/questions/18336277/how-to-check-string-in-response-body-with-mockmvc, https://stackoverflow.com/questions/58192256/testing-the-controller-which-returns-response-entity
+
 }
