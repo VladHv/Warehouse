@@ -6,7 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Objects;
 
@@ -18,12 +18,12 @@ public abstract class Person {
     @ApiModelProperty(notes = "The unique id of the person", example = "1")
     protected Integer id;
 
-    @NotBlank(message = "First name required")
+    @NotNull(message = "First name required")
     @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
     @ApiModelProperty(notes = "The person's first name", example = "Kevin")
     protected String firstName;
 
-    @NotBlank(message = "Last name required")
+    @NotNull(message = "Last name required")
     @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
     @ApiModelProperty(notes = "The person's last name", example = "Eddy")
     protected String lastName;
