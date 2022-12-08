@@ -11,12 +11,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,6 +36,37 @@ class SupplierControllerTest {
 
     @InjectMocks
     private SupplierController controller;
+
+    @Test
+    void findAllSuppliers_shouldHasStatusOkAndReturnListFromService_whenListNotNullAndNotEmpty() throws Exception {
+        Supplier supplier = new Supplier.Builder().withFirstName("Bob").withLastName("Smith").build();
+        List<Supplier> allSuppliers = List.of(supplier);
+        given(service.findAll()).willReturn(allSuppliers);
+        mockMvc.perform(get("/suppliers"))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$", hasSize(1)))
+               .andExpect(jsonPath("$[0].firstName", Is.is(supplier.getFirstName())))
+               .andExpect(jsonPath("$[0].lastName", Is.is(supplier.getLastName())));
+    }
+
+    @Test
+    void findAllSuppliers_shouldHasStatusNotFound_whenListFromServiceIsNull() throws Exception {
+        List<Supplier> allSuppliers = null;
+        given(service.findAll()).willReturn(allSuppliers);
+        mockMvc.perform(get("/suppliers"))
+               .andDo(print())
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void findAllSuppliers_shouldHasStatusNotFound_whenListFromServiceIsEmpty() throws Exception {
+        List<Supplier> allSuppliers = Collections.emptyList();
+        given(service.findAll()).willReturn(allSuppliers);
+        mockMvc.perform(get("/suppliers"))
+               .andDo(print())
+               .andExpect(status().isNotFound());
+    }
 
     @Test
     void createSupplier_shouldHasStatusBadRequestAndValidationMessage_whenFirstNameIsBlank() throws Exception {
