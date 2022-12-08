@@ -14,12 +14,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -174,7 +175,6 @@ class SupplierControllerTest {
 
     @Test
     void createSupplier_shouldHasNoErrorsAndStatusCreated_whenFirstNameAndLastNameAreValid() throws Exception {
-        MediaType textPlainUtf8 = new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);
         String supplier = new JSONObject().put("firstName", "Bob")
                                           .put("lastName", "Smith")
                                           .toString();
@@ -183,7 +183,9 @@ class SupplierControllerTest {
                             .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())
                .andExpect(status().isCreated())
-               .andExpect(content().contentType(textPlainUtf8));
+               .andExpect(content().string("Supplier is valid"));
+        verify(service, times(1)).create(new Supplier.Builder().withFirstName("Bob").withLastName("Smith").build());
+        // TODO: 08.12.2022 add verification of service call and messages for other methods
     }
 
     @Test
