@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
@@ -49,6 +50,7 @@ class SupplierControllerTest {
                .andExpect(jsonPath("$", hasSize(1)))
                .andExpect(jsonPath("$[0].firstName", Is.is(supplier.getFirstName())))
                .andExpect(jsonPath("$[0].lastName", Is.is(supplier.getLastName())));
+        verify(service, times(1)).findAll();
     }
 
     @Test
@@ -65,6 +67,28 @@ class SupplierControllerTest {
         List<Supplier> allSuppliers = Collections.emptyList();
         given(service.findAll()).willReturn(allSuppliers);
         mockMvc.perform(get("/suppliers"))
+               .andDo(print())
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void findSupplierById_shouldHasStatusOkAndReturnService_whenServiceReturnSupplier() throws Exception {
+        Supplier supplier = new Supplier.Builder().withId(1).withFirstName("Bob").withLastName("Smith").build();
+        given(service.findById(supplier.getId())).willReturn(supplier);
+
+        mockMvc.perform(get("/suppliers/{id}", 1))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.firstName", Is.is(supplier.getFirstName())))
+               .andExpect(jsonPath("$.lastName", Is.is(supplier.getLastName())));
+        verify(service, times(1)).findById(supplier.getId());
+    }
+
+    @Test
+    void findSupplierById_shouldHasStatusBadRequest_whenServiceThrowsServiceEx() throws Exception {
+        Integer supplierId = 1;
+        given(service.findById(supplierId)).willThrow(new ServiceException("Supplier not found by ID: " + supplierId));
+        mockMvc.perform(get("/suppliers/{id}", supplierId))
                .andDo(print())
                .andExpect(status().isNotFound());
     }
@@ -185,7 +209,6 @@ class SupplierControllerTest {
                .andExpect(status().isCreated())
                .andExpect(content().string("Supplier is valid"));
         verify(service, times(1)).create(new Supplier.Builder().withFirstName("Bob").withLastName("Smith").build());
-        // TODO: 08.12.2022 add verification of service call and messages for other methods
     }
 
     @Test
@@ -294,16 +317,35 @@ class SupplierControllerTest {
 
     @Test
     void updateSupplier_shouldHasNoErrorsAndStatusOk_whenFirstNameAndLastNameAreValid() throws Exception {
-        String supplier = new JSONObject().put("firstName", "Bob")
-                                          .put("lastName", "Smith")
-                                          .toString();
-        mockMvc.perform(put("/suppliers/{id}", 1)
-                            .content(supplier)
+        Integer supplierId = 1;
+        Supplier supplier = new Supplier.Builder().withFirstName("Bob").withLastName("Smith").build();
+        String supplierJSON = new JSONObject().put("firstName", supplier.getFirstName())
+                                              .put("lastName", supplier.getLastName())
+                                              .toString();
+
+        given(service.update(supplier, supplierId)).willReturn(supplier);
+
+        mockMvc.perform(put("/suppliers/{id}", supplierId)
+                            .content(supplierJSON)
                             .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())
-               .andExpect(status().isOk());
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.firstName", Is.is(supplier.getFirstName())))
+               .andExpect(jsonPath("$.lastName", Is.is(supplier.getLastName())));
+        verify(service, times(1)).update(new Supplier.Builder()
+                                             .withFirstName(supplier.getFirstName())
+                                             .withLastName(supplier.getLastName())
+                                             .build(), supplierId);
     }
 
-    // TODO: 08.12.2022 to test DELETE use andReturn() for MockMvc, see: https://stackoverflow.com/questions/18336277/how-to-check-string-in-response-body-with-mockmvc, https://stackoverflow.com/questions/58192256/testing-the-controller-which-returns-response-entity
+    @Test
+    void deleteSupplier_shouldHasStatusOkAndMessage_whenDeletingSupplier() throws Exception {
+        Integer supplierId = 1;
 
+        mockMvc.perform(delete("/suppliers/{id}", supplierId))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(content().string("Supplier deleted successfully"));
+        verify(service, times(1)).delete(supplierId);
+    }
 }
