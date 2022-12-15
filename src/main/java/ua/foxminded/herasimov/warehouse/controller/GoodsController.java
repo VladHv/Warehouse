@@ -66,6 +66,7 @@ public class GoodsController {
                                               @Size(min = 2, max = 5, message = "Length should be from 2 to 5")
                                               @RequestParam(value = "message", required = false) String message) {
         service.delete(id);
+        if (message == null) message = "";
         return new ResponseEntity<>("Goods deleted successfully" + message, HttpStatus.OK);
     }
 
