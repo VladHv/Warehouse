@@ -20,8 +20,6 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -50,7 +48,6 @@ class SupplierControllerTest {
                .andExpect(jsonPath("$", hasSize(1)))
                .andExpect(jsonPath("$[0].firstName", Is.is(supplier.getFirstName())))
                .andExpect(jsonPath("$[0].lastName", Is.is(supplier.getLastName())));
-        verify(service, times(1)).findAll();
     }
 
     @Test
@@ -81,7 +78,6 @@ class SupplierControllerTest {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.firstName", Is.is(supplier.getFirstName())))
                .andExpect(jsonPath("$.lastName", Is.is(supplier.getLastName())));
-        verify(service, times(1)).findById(supplier.getId());
     }
 
     @Test
@@ -208,7 +204,6 @@ class SupplierControllerTest {
                .andDo(print())
                .andExpect(status().isCreated())
                .andExpect(content().string("Supplier is valid"));
-        verify(service, times(1)).create(new Supplier.Builder().withFirstName("Bob").withLastName("Smith").build());
     }
 
     @Test
@@ -332,20 +327,14 @@ class SupplierControllerTest {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.firstName", Is.is(supplier.getFirstName())))
                .andExpect(jsonPath("$.lastName", Is.is(supplier.getLastName())));
-        verify(service, times(1)).update(new Supplier.Builder()
-                                             .withFirstName(supplier.getFirstName())
-                                             .withLastName(supplier.getLastName())
-                                             .build(), supplierId);
     }
 
     @Test
     void deleteSupplier_shouldHasStatusOkAndMessage_whenDeletingSupplier() throws Exception {
         Integer supplierId = 1;
-
         mockMvc.perform(delete("/suppliers/{id}", supplierId))
                .andDo(print())
                .andExpect(status().isOk())
                .andExpect(content().string("Supplier deleted successfully"));
-        verify(service, times(1)).delete(supplierId);
     }
 }
