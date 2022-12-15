@@ -38,7 +38,7 @@ class GoodsControllerTest {
     private GoodsController controller;
 
     @Test
-    void findAllSuppliers_shouldHasStatusOkAndReturnListFromService_whenListNotNullAndNotEmpty() throws Exception {
+    void getAllGoods_shouldHasStatusOkAndReturnListFromService_whenListNotNullAndNotEmpty() throws Exception {
         Goods goods = new Goods.Builder().withName("Tomato").withPrice(99).build();
         List<Goods> allGoods = List.of(goods);
         given(service.findAll()).willReturn(allGoods);
@@ -51,7 +51,7 @@ class GoodsControllerTest {
     }
 
     @Test
-    void findAllSuppliers_shouldHasStatusNotFound_whenListFromServiceIsNull() throws Exception {
+    void getAllGoods_shouldHasStatusNotFound_whenListFromServiceIsNull() throws Exception {
         List<Goods> allGoods = null;
         given(service.findAll()).willReturn(allGoods);
         mockMvc.perform(get("/goods"))
@@ -60,7 +60,7 @@ class GoodsControllerTest {
     }
 
     @Test
-    void findAllSuppliers_shouldHasStatusNotFound_whenListFromServiceIsEmpty() throws Exception {
+    void getAllGoods_shouldHasStatusNotFound_whenListFromServiceIsEmpty() throws Exception {
         List<Goods> allGoods = Collections.emptyList();
         given(service.findAll()).willReturn(allGoods);
         mockMvc.perform(get("/goods"))
