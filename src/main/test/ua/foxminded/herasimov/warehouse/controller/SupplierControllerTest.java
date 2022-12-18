@@ -69,7 +69,7 @@ class SupplierControllerTest {
     }
 
     @Test
-    void findSupplierById_shouldHasStatusOkAndReturnService_whenServiceReturnSupplier() throws Exception {
+    void findSupplierById_shouldHasStatusOkAndReturnEntity_whenServiceReturnSupplier() throws Exception {
         Supplier supplier = new Supplier.Builder().withId(1).withFirstName("Bob").withLastName("Smith").build();
         given(service.findById(supplier.getId())).willReturn(supplier);
 

@@ -69,7 +69,7 @@ class GoodsControllerTest {
     }
 
     @Test
-    void findSupplierById_shouldHasStatusOkAndReturnService_whenServiceReturnGoods() throws Exception {
+    void findSupplierById_shouldHasStatusOkAndReturnEntity_whenServiceReturnGoods() throws Exception {
         Goods goods = new Goods.Builder().withId(1).withName("Tomato").withPrice(99).build();
         given(service.findById(goods.getId())).willReturn(goods);
 
