@@ -185,7 +185,7 @@ public class OrderController {
                                                                          example = "1",
                                                                          required = true)
                                                                @PathVariable("orderItemId") Integer orderItemId) {
-        return new ResponseEntity<>(orderItemService.findByIdOnOrder(orderItemId, orderId), HttpStatus.OK);
+        return new ResponseEntity<>(orderItemService.findByIdInOrder(orderItemId, orderId), HttpStatus.OK);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

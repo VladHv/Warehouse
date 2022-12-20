@@ -20,9 +20,10 @@ public class SpringFoxConfig {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiDetails())
-            .select()
-            .apis(RequestHandlerSelectors.basePackage("ua.foxminded.herasimov.warehouse.controller"))
-            .build();
+                                                      .select()
+                                                      .apis(RequestHandlerSelectors.basePackage(
+                                                          "ua.foxminded.herasimov.warehouse.controller"))
+                                                      .build();
     }
 
     private ApiInfo apiDetails() {

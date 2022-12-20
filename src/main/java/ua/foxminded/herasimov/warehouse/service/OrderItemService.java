@@ -14,5 +14,5 @@ public interface OrderItemService extends Service<Integer, OrderItem>{
 
     OrderItem updateOnOrder(OrderItem orderItem, Integer orderItemId, Integer orderId);
 
-    OrderItem findByIdOnOrder(Integer orderItemId, Integer orderId);
+    OrderItem findByIdInOrder(Integer orderItemId, Integer orderId);
 }

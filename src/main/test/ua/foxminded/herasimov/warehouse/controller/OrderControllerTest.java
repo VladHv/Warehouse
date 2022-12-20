@@ -318,7 +318,7 @@ class OrderControllerTest {
         Integer orderItemId = 1;
         OrderItem orderItem = new OrderItem.Builder().withAmount(12).build();
 
-        given(orderItemService.findByIdOnOrder(orderItemId, orderId)).willReturn(orderItem);
+        given(orderItemService.findByIdInOrder(orderItemId, orderId)).willReturn(orderItem);
 
         mockMvc.perform(get("/orders/{orderId}/orderItems/{orderItemId}", orderId, orderItemId))
                .andDo(print())
