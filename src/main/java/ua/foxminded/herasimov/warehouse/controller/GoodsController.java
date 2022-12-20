@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.Goods;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsServiceImpl;
 
@@ -65,6 +66,7 @@ public class GoodsController {
                                               @Size(min = 2, max = 5, message = "Length should be from 2 to 5")
                                               @RequestParam(value = "message", required = false) String message) {
         service.delete(id);
+        if (message == null) message = "";
         return new ResponseEntity<>("Goods deleted successfully" + message, HttpStatus.OK);
     }
 
@@ -76,7 +78,11 @@ public class GoodsController {
                                                          value = "ID value for the goods",
                                                          example = "1",
                                                          required = true) @PathVariable("id") Integer id) {
-        return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
+        } catch (ServiceException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @ApiOperation(value = "Update existed goods",

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.Order;
 import ua.foxminded.herasimov.warehouse.model.OrderItem;
 import ua.foxminded.herasimov.warehouse.service.impl.OrderItemServiceImpl;
@@ -88,7 +89,11 @@ public class OrderController {
                                                          example = "1",
                                                          required = true)
                                                @PathVariable("id") Integer id) {
-        return new ResponseEntity<>(orderService.findById(id), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(orderService.findById(id), HttpStatus.OK);
+        } catch (ServiceException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @ApiOperation(value = "Find all orders items from order",
@@ -162,7 +167,7 @@ public class OrderController {
                                                           @ApiParam("Order item to update. Cannot be null or empty")
                                                           @Valid @RequestBody OrderItem orderItem) {
         orderItemService.updateOnOrder(orderItem, orderItemId, orderId);
-        return new ResponseEntity<>("OrderItem is valid", HttpStatus.CREATED);
+        return new ResponseEntity<>("OrderItem is valid", HttpStatus.OK);
     }
 
     @ApiOperation(value = "Find order item by id in order",
@@ -180,7 +185,7 @@ public class OrderController {
                                                                          example = "1",
                                                                          required = true)
                                                                @PathVariable("orderItemId") Integer orderItemId) {
-        return new ResponseEntity<>(orderItemService.findByIdOnOrder(orderItemId, orderId), HttpStatus.OK);
+        return new ResponseEntity<>(orderItemService.findByIdInOrder(orderItemId, orderId), HttpStatus.OK);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

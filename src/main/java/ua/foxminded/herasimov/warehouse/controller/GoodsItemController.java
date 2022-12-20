@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.GoodsItem;
 import ua.foxminded.herasimov.warehouse.service.impl.GoodsItemServiceImpl;
 
@@ -70,7 +71,11 @@ public class GoodsItemController {
                                                                  example = "1",
                                                                  required = true)
                                                        @PathVariable("id") Integer id) {
-        return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
+        } catch (ServiceException ex) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @ApiOperation(value = "Update existed goods item",

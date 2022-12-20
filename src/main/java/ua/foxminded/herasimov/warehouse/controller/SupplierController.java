@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.Supplier;
 import ua.foxminded.herasimov.warehouse.service.impl.SupplierServiceImpl;
 
@@ -70,7 +71,11 @@ public class SupplierController {
                                                                example = "1",
                                                                required = true)
                                                      @PathVariable("id") Integer id) {
-        return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(service.findById(id), HttpStatus.OK);
+        } catch (ServiceException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @ApiOperation(value = "Update existed supplier",
@@ -83,7 +88,7 @@ public class SupplierController {
                                                              required = true)
                                                    @PathVariable("id") Integer id,
                                                    @ApiParam("Supplier to update. Cannot be null or empty")
-                                                   @Valid @ModelAttribute("supplier") Supplier supplier) {
+                                                   @Valid @RequestBody Supplier supplier) {
         return new ResponseEntity<>(service.update(supplier, id), HttpStatus.OK);
     }
 

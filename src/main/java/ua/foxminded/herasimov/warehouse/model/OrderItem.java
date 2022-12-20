@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
@@ -22,7 +23,8 @@ public class OrderItem {
     @JoinColumn(name = "goods_id")
     private Goods goods;
 
-    @Min(1)
+    @NotNull(message = "Input amount!")
+    @Min(value = 1, message = "Amount should be at least one")
     @ApiModelProperty(notes = "The goods' amount in order", example = "66")
     private Integer amount;
 

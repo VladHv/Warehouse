@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Objects;
@@ -20,7 +19,7 @@ public class Goods {
     @ApiModelProperty(notes = "The unique id of the goods", example = "1")
     private Integer id;
 
-    @NotBlank(message = "Input name of goods!")
+    @NotNull(message = "Input name of goods!")
     @Size(min = 2, max = 250, message = "Length should be from 2 to 250")
     @ApiModelProperty(notes = "The goods' name", example = "Tomato")
     private String name;
