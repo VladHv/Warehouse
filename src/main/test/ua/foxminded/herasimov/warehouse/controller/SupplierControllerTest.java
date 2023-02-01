@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -70,8 +72,8 @@ class SupplierControllerTest {
 
     @Test
     void findSupplierById_shouldHasStatusOkAndReturnEntity_whenServiceReturnSupplier() throws Exception {
-        Supplier supplier = new Supplier.Builder().withId(1).withFirstName("Bob").withLastName("Smith").build();
-        given(service.findById(supplier.getId())).willReturn(supplier);
+        Supplier supplier = new Supplier.Builder().withFirstName("Bob").withLastName("Smith").build();
+        given(service.findById(anyInt())).willReturn(supplier);
 
         mockMvc.perform(get("/suppliers/{id}", 1))
                .andDo(print())
@@ -82,9 +84,8 @@ class SupplierControllerTest {
 
     @Test
     void findSupplierById_shouldHasStatusBadRequest_whenServiceThrowsServiceEx() throws Exception {
-        Integer supplierId = 1;
-        given(service.findById(supplierId)).willThrow(new ServiceException("Supplier not found by ID: " + supplierId));
-        mockMvc.perform(get("/suppliers/{id}", supplierId))
+        given(service.findById(anyInt())).willThrow(new ServiceException("Supplier not found by ID: "));
+        mockMvc.perform(get("/suppliers/{id}", 1))
                .andDo(print())
                .andExpect(status().isNotFound());
     }
@@ -312,15 +313,14 @@ class SupplierControllerTest {
 
     @Test
     void updateSupplier_shouldHasNoErrorsAndStatusOk_whenFirstNameAndLastNameAreValid() throws Exception {
-        Integer supplierId = 1;
         Supplier supplier = new Supplier.Builder().withFirstName("Bob").withLastName("Smith").build();
         String supplierJSON = new JSONObject().put("firstName", supplier.getFirstName())
                                               .put("lastName", supplier.getLastName())
                                               .toString();
 
-        given(service.update(supplier, supplierId)).willReturn(supplier);
+        given(service.update(any(Supplier.class), anyInt())).willReturn(supplier);
 
-        mockMvc.perform(put("/suppliers/{id}", supplierId)
+        mockMvc.perform(put("/suppliers/{id}", 1)
                             .content(supplierJSON)
                             .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())

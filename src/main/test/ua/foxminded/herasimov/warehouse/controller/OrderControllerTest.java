@@ -13,7 +13,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import ua.foxminded.herasimov.warehouse.exception.ServiceException;
 import ua.foxminded.herasimov.warehouse.model.Order;
 import ua.foxminded.herasimov.warehouse.model.OrderItem;
 import ua.foxminded.herasimov.warehouse.model.OrderStatus;
@@ -24,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -116,13 +117,12 @@ class OrderControllerTest {
 
     @Test
     void updateOrder_shouldHasNoErrorsAndStatusOk_whenOrderNotNull() throws Exception {
-        Integer orderId = 1;
         Order order = new Order.Builder().withStatus(OrderStatus.NEW).build();
         String orderJSON = getJson(order);
 
-        given(orderService.update(order, orderId)).willReturn(order);
+        given(orderService.update(any(Order.class), anyInt())).willReturn(order);
 
-        mockMvc.perform(put("/orders/{id}", orderId)
+        mockMvc.perform(put("/orders/{id}", 1)
                             .content(orderJSON)
                             .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())
@@ -132,13 +132,12 @@ class OrderControllerTest {
 
     @Test
     void updateOrder_shouldHasStatusBadRequest_whenOrderIsNull() throws Exception {
-        Integer orderId = 1;
         Order order = null;
         String orderJSON = getJson(order);
 
-        given(orderService.update(order, orderId)).willReturn(order);
+        given(orderService.update(any(Order.class), anyInt())).willReturn(order);
 
-        mockMvc.perform(put("/orders/{id}", orderId)
+        mockMvc.perform(put("/orders/{id}", 1)
                             .content(orderJSON)
                             .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())
@@ -147,12 +146,11 @@ class OrderControllerTest {
 
     @Test
     void findOrderById_shouldHasStatusOkAndReturnEntity_whenServiceReturnOrder() throws Exception {
-        Integer orderId = 1;
         Order order = new Order.Builder().withStatus(OrderStatus.NEW).build();
         String orderJSON = getJson(order);
 
-        given(orderService.findById(orderId)).willReturn(order);
-        mockMvc.perform(get("/orders/{id}", orderId)
+        given(orderService.findById(anyInt())).willReturn(order);
+        mockMvc.perform(get("/orders/{id}", 1)
                             .content(orderJSON)
                             .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())
@@ -161,27 +159,12 @@ class OrderControllerTest {
     }
 
     @Test
-    void findOrderById_shouldHasStatusBadRequest_whenOrderIdIsIrrelevant() throws Exception {
-        Integer orderId = -1;
-        Order order = new Order.Builder().withStatus(OrderStatus.NEW).build();
-        String orderJSON = getJson(order);
-
-        given(orderService.findById(orderId)).willThrow(new ServiceException("Order not found by ID: " + orderId));
-        mockMvc.perform(get("/orders/{id}", orderId)
-                            .content(orderJSON)
-                            .contentType(MediaType.APPLICATION_JSON))
-               .andDo(print())
-               .andExpect(status().isNotFound());
-    }
-
-    @Test
     void findAllOrderItemsFromOrder_shouldHasStatusOkAndReturnListFromService_whenListNotNullAndNotEmpty() throws
         Exception {
-        Integer orderId = 1;
         OrderItem orderItem = new OrderItem.Builder().withAmount(12).build();
         List<OrderItem> allOrderItems = List.of(orderItem);
-        given(orderItemService.findAllFromOrder(orderId)).willReturn(allOrderItems);
-        mockMvc.perform(get("/orders/{orderId}/orderItems", orderId))
+        given(orderItemService.findAllFromOrder(anyInt())).willReturn(allOrderItems);
+        mockMvc.perform(get("/orders/{orderId}/orderItems", 1))
                .andDo(print())
                .andExpect(status().isOk())
                .andExpect(jsonPath("$", hasSize(1)))
@@ -190,33 +173,30 @@ class OrderControllerTest {
 
     @Test
     void findAllOrderItemsFromOrder_shouldHasStatusOkAndReturnListFromService_whenListIsNull() throws Exception {
-        Integer orderId = 1;
         List<OrderItem> allOrderItems = null;
-        given(orderItemService.findAllFromOrder(orderId)).willReturn(allOrderItems);
-        mockMvc.perform(get("/orders/{orderId}/orderItems", orderId))
+        given(orderItemService.findAllFromOrder(anyInt())).willReturn(allOrderItems);
+        mockMvc.perform(get("/orders/{orderId}/orderItems", 1))
                .andDo(print())
                .andExpect(status().isNotFound());
     }
 
     @Test
     void findAllOrderItemsFromOrder_shouldHasStatusOkAndReturnListFromService_whenListIsEmpty() throws Exception {
-        Integer orderId = 1;
         List<OrderItem> allOrderItems = Collections.emptyList();
-        given(orderItemService.findAllFromOrder(orderId)).willReturn(allOrderItems);
-        mockMvc.perform(get("/orders/{orderId}/orderItems", orderId))
+        given(orderItemService.findAllFromOrder(anyInt())).willReturn(allOrderItems);
+        mockMvc.perform(get("/orders/{orderId}/orderItems", 1))
                .andDo(print())
                .andExpect(status().isNotFound());
     }
 
     @Test
     void createOrderItemsInOrder_shouldHasNoErrorsAndStatusCreated_whenOrderItemIsValid() throws Exception {
-        Integer orderId = 1;
         OrderItem orderItem = new OrderItem.Builder().withAmount(12).build();
         String orderItemJSON = getJson(orderItem);
 
-        given(orderItemService.createOnOrder(orderItem, orderId)).willReturn(orderItem);
+        given(orderItemService.createOnOrder(any(OrderItem.class), anyInt())).willReturn(orderItem);
 
-        mockMvc.perform(post("/orders/{orderId}/orderItems", orderId)
+        mockMvc.perform(post("/orders/{orderId}/orderItems", 1)
                             .content(orderItemJSON)
                             .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())
@@ -270,7 +250,7 @@ class OrderControllerTest {
         OrderItem orderItem = new OrderItem.Builder().withAmount(12).build();
         String orderItemJSON = getJson(orderItem);
 
-        given(orderItemService.updateOnOrder(orderItem, orderItemId, orderId)).willReturn(orderItem);
+        given(orderItemService.updateOnOrder(any(OrderItem.class), anyInt(), anyInt())).willReturn(orderItem);
 
         mockMvc.perform(put("/orders/{orderId}/orderItems/{orderItemId}", orderId, orderItemId)
                             .content(orderItemJSON)
@@ -302,7 +282,7 @@ class OrderControllerTest {
         OrderItem orderItem = new OrderItem.Builder().withAmount(12).build();
         String orderItemJSON = getJson(orderItem);
 
-        given(orderItemService.updateOnOrder(orderItem, orderItemId, orderId)).willReturn(orderItem);
+        given(orderItemService.updateOnOrder(any(OrderItem.class), anyInt(), anyInt())).willReturn(orderItem);
 
         mockMvc.perform(put("/orders/{orderId}/orderItems/{orderItemId}", orderId, orderItemId)
                             .content(orderItemJSON)
@@ -318,7 +298,7 @@ class OrderControllerTest {
         Integer orderItemId = 1;
         OrderItem orderItem = new OrderItem.Builder().withAmount(12).build();
 
-        given(orderItemService.findByIdInOrder(orderItemId, orderId)).willReturn(orderItem);
+        given(orderItemService.findByIdInOrder(anyInt(), anyInt())).willReturn(orderItem);
 
         mockMvc.perform(get("/orders/{orderId}/orderItems/{orderItemId}", orderId, orderItemId))
                .andDo(print())

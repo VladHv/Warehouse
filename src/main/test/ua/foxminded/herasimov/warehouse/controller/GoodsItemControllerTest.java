@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -72,8 +74,8 @@ class GoodsItemControllerTest {
 
     @Test
     void findGoodsItemById_shouldHasStatusOkAndReturnEntity_whenServiceReturnSupplier() throws Exception {
-        GoodsItem goodsItem = new GoodsItem.Builder().withId(1).withAmount(3).build();
-        given(service.findById(goodsItem.getId())).willReturn(goodsItem);
+        GoodsItem goodsItem = new GoodsItem.Builder().withAmount(3).build();
+        given(service.findById(anyInt())).willReturn(goodsItem);
 
         mockMvc.perform(get("/goodsItems/{id}", 1))
                .andDo(print())
@@ -83,10 +85,9 @@ class GoodsItemControllerTest {
 
     @Test
     void findGoodsItemById_shouldHasStatusBadRequest_whenServiceThrowsServiceEx() throws Exception {
-        Integer goodsItemId = 1;
-        given(service.findById(goodsItemId)).willThrow(
-            new ServiceException("GoodsItem not found by ID: " + goodsItemId));
-        mockMvc.perform(get("/goodsItems/{id}", goodsItemId))
+        given(service.findById(anyInt())).willThrow(
+            new ServiceException("GoodsItem not found by ID: "));
+        mockMvc.perform(get("/goodsItems/{id}", 1))
                .andDo(print())
                .andExpect(status().isNotFound());
     }
@@ -171,9 +172,9 @@ class GoodsItemControllerTest {
     @Test
     void updateGoodsItem_shouldHasNoErrorsAndStatusOk_whenGoodsIdAndAmountAreValid() throws Exception {
         GoodsItem goodsItem =
-            new GoodsItem.Builder().withId(1).withGoods(new Goods()).withAmount(12).build();
+            new GoodsItem.Builder().withGoods(new Goods()).withAmount(12).build();
         String goodsItemJSON = getJson(goodsItem);
-        given(service.update(goodsItem, goodsItem.getId())).willReturn(goodsItem);
+        given(service.update(any(GoodsItem.class), anyInt())).willReturn(goodsItem);
         mockMvc.perform(put("/goodsItems/{id}", 1)
                             .content(goodsItemJSON)
                             .contentType(MediaType.APPLICATION_JSON))

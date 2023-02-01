@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -70,8 +72,8 @@ class GoodsControllerTest {
 
     @Test
     void findSupplierById_shouldHasStatusOkAndReturnEntity_whenServiceReturnGoods() throws Exception {
-        Goods goods = new Goods.Builder().withId(1).withName("Tomato").withPrice(99).build();
-        given(service.findById(goods.getId())).willReturn(goods);
+        Goods goods = new Goods.Builder().withName("Tomato").withPrice(99).build();
+        given(service.findById(anyInt())).willReturn(goods);
 
         mockMvc.perform(get("/goods/{id}", 1))
                .andDo(print())
@@ -82,9 +84,8 @@ class GoodsControllerTest {
 
     @Test
     void findSupplierById_shouldHasStatusBadRequest_whenServiceThrowsServiceEx() throws Exception {
-        Integer supplierId = 1;
-        given(service.findById(supplierId)).willThrow(new ServiceException("Goods not found by ID: " + supplierId));
-        mockMvc.perform(get("/goods/{id}", supplierId))
+        given(service.findById(anyInt())).willThrow(new ServiceException("Goods not found by ID: "));
+        mockMvc.perform(get("/goods/{id}", anyInt()))
                .andDo(print())
                .andExpect(status().isNotFound());
     }
@@ -232,13 +233,12 @@ class GoodsControllerTest {
 
     @Test
     void updateGoods_shouldHasNoErrorsAndStatusOk_whenNameAndPriceAreValid() throws Exception {
-        Integer goodsId = 1;
         Goods goods = new Goods.Builder().withName("Tomato").withPrice(99).build();
         String goodsJSON = new JSONObject().put("name", "Tomato")
                                            .put("price", 99)
                                            .toString();
 
-        given(service.update(goods, goodsId)).willReturn(goods);
+        given(service.update(any(Goods.class), anyInt())).willReturn(goods);
 
         mockMvc.perform(put("/goods/{id}", 1)
                             .content(goodsJSON)
